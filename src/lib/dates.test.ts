@@ -7,7 +7,9 @@ import {
   timeToMinutes,
   todayIn,
   urgencyOf,
+  utcToZonedInput,
   weekdayIn,
+  zonedInputToUtc,
 } from "./dates";
 
 const TZ = "America/Mexico_City";
@@ -82,6 +84,37 @@ describe("fechas en lenguaje natural", () => {
 
   it("sin fecha lo dice claro", () => {
     expect(relativeDueLabel(null, TZ)).toBe("Sin fecha");
+  });
+});
+
+describe("captura de fechas en la zona del usuario", () => {
+  it("interpreta la hora escrita en la zona del usuario, no la del servidor", () => {
+    // Viernes 7 pm en México (UTC-6) es sábado 1:00 UTC.
+    const utc = zonedInputToUtc("2026-08-07", "19:00", TZ);
+    expect(utc?.toISOString()).toBe("2026-08-08T01:00:00.000Z");
+  });
+
+  it("sin hora ancla al final del día del usuario", () => {
+    const utc = zonedInputToUtc("2026-08-07", null, TZ);
+    // 23:59 del 7 en México sigue siendo el 7 para el usuario.
+    expect(todayIn(TZ, utc as Date)).toBe("2026-08-07");
+  });
+
+  it("la ida y vuelta no mueve la fecha", () => {
+    const utc = zonedInputToUtc("2026-08-07", "19:00", TZ);
+    expect(utcToZonedInput(utc, TZ)).toEqual({ date: "2026-08-07", time: "19:00" });
+  });
+
+  it("una entrega nocturna no se corre de día al editarla", () => {
+    // 23:30 local cae al día siguiente en UTC: es donde suele romperse.
+    const utc = zonedInputToUtc("2026-08-07", "23:30", TZ);
+    expect(utc?.toISOString().slice(0, 10)).toBe("2026-08-08");
+    expect(utcToZonedInput(utc, TZ).date).toBe("2026-08-07");
+  });
+
+  it("sin fecha no inventa nada", () => {
+    expect(zonedInputToUtc(null, "19:00", TZ)).toBeNull();
+    expect(utcToZonedInput(null, TZ)).toEqual({ date: null, time: null });
   });
 });
 

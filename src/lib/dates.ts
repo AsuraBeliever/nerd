@@ -117,6 +117,48 @@ export function shortDate(date: Date | string, timezone: string): string {
 }
 
 /**
+ * Convierte lo que el usuario escribió ("2026-08-07" + "19:00") al instante
+ * real, interpretándolo **en su zona horaria**, no en la del servidor.
+ *
+ * Sin esto, un examen "el viernes a las 7 pm" capturado en México quedaría
+ * guardado como 7 pm del servidor y se movería de día en la pantalla.
+ * Sin hora, se ancla al final del día: "vence el viernes" vale todo el viernes.
+ */
+export function zonedInputToUtc(
+  date: string | null,
+  time: string | null,
+  timezone: string,
+): Date | null {
+  if (!date) return null;
+
+  const [y, m, d] = date.split("-").map(Number);
+  if (!y || !m || !d) return null;
+
+  const [hh, mm] = time ? time.split(":").map(Number) : [23, 59];
+  const zoned = new TZDate(y, m - 1, d, hh ?? 0, mm ?? 0, time ? 0 : 59, 0, timezone);
+
+  return new Date(zoned.getTime());
+}
+
+/** El inverso: parte un instante en la fecha y hora que el usuario ve. */
+export function utcToZonedInput(
+  value: Date | null,
+  timezone: string,
+): { date: string | null; time: string | null } {
+  if (!value) return { date: null, time: null };
+  const zoned = new TZDate(value, timezone);
+  return { date: format(zoned, "yyyy-MM-dd"), time: format(zoned, "HH:mm") };
+}
+
+/** Inicio y fin del día del usuario, como instantes UTC. */
+export function dayBoundsIn(timezone: string, now: Date = new Date()): { start: Date; end: Date } {
+  const today = todayIn(timezone, now);
+  const start = zonedInputToUtc(today, "00:00", timezone);
+  const end = zonedInputToUtc(today, "23:59", timezone);
+  return { start: start ?? now, end: end ?? now };
+}
+
+/**
  * Ordena los días para que la semana empiece donde el usuario quiera.
  * `weekStartsOn` es ISO: 1 = lunes … 7 = domingo.
  */

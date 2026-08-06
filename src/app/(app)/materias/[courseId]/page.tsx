@@ -5,6 +5,9 @@ import { AttendanceBar } from "@/features/attendance/components/attendance-bar";
 import { getCourseAttendance } from "@/features/attendance/queries";
 import { BlockList } from "@/features/courses/components/block-list";
 import { getCourse, listBlocks } from "@/features/courses/queries";
+import { TaskList } from "@/features/tasks/components/task-list";
+import { listTasks } from "@/features/tasks/queries";
+import { toListItem } from "@/features/tasks/to-list-item";
 import { courseColor } from "@/lib/course-colors";
 import { requireUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -21,9 +24,10 @@ export default async function CourseDetailPage({
   const course = await getCourse(user.id, courseId);
   if (!course) notFound();
 
-  const [blocks, attendance] = await Promise.all([
+  const [blocks, attendance, courseTasks] = await Promise.all([
     listBlocks(user.id, course.id),
     getCourseAttendance(user, course.id),
+    listTasks(user.id, { courseId: course.id }),
   ]);
   const minPct = Number(course.minAttendancePct ?? user.defaultMinAttendancePct);
 
@@ -71,6 +75,16 @@ export default async function CourseDetailPage({
           room: b.room,
         }))}
       />
+
+      <section className="mt-10">
+        <h2 className="mb-3 text-lg font-semibold">Tareas y exámenes</h2>
+        <TaskList
+          tasks={courseTasks.map(toListItem)}
+          timezone={user.timezone}
+          courses={[{ id: course.id, name: course.name }]}
+          emptyTitle="Sin pendientes de esta materia"
+        />
+      </section>
     </>
   );
 }
