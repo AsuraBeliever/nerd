@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
+import { AttendanceBar } from "@/features/attendance/components/attendance-bar";
+import { getCourseAttendance } from "@/features/attendance/queries";
 import { BlockList } from "@/features/courses/components/block-list";
 import { getCourse, listBlocks } from "@/features/courses/queries";
 import { courseColor } from "@/lib/course-colors";
@@ -19,7 +21,11 @@ export default async function CourseDetailPage({
   const course = await getCourse(user.id, courseId);
   if (!course) notFound();
 
-  const blocks = await listBlocks(user.id, course.id);
+  const [blocks, attendance] = await Promise.all([
+    listBlocks(user.id, course.id),
+    getCourseAttendance(user, course.id),
+  ]);
+  const minPct = Number(course.minAttendancePct ?? user.defaultMinAttendancePct);
 
   return (
     <>
@@ -44,10 +50,16 @@ export default async function CourseDetailPage({
         </span>
         {course.credits !== null && <span>{course.credits} créditos</span>}
         <span>
-          Asistencia mínima: {course.minAttendancePct ?? user.defaultMinAttendancePct}%
-          {course.minAttendancePct === null && " (general)"}
+          Asistencia mínima: {minPct}%{course.minAttendancePct === null && " (general)"}
         </span>
       </div>
+
+      {attendance && (
+        <section className="mt-8 rounded-card border border-border bg-surface p-4">
+          <h2 className="mb-3 text-lg font-semibold">Asistencia</h2>
+          <AttendanceBar summary={attendance.summary} minPct={minPct} />
+        </section>
+      )}
 
       <BlockList
         courseId={course.id}

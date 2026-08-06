@@ -1,8 +1,8 @@
 import { isNull } from "drizzle-orm";
-import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { SEED_EXERCISES } from "./seed-exercises";
+import postgres from "postgres";
 import * as schema from "./schema";
+import { SEED_EXERCISES } from "./seed-exercises";
 
 /**
  * Carga el catálogo de ejercicios del sistema (userId NULL).
