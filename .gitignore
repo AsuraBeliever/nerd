@@ -1,0 +1,50 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Entorno — NUNCA commitear
+.env
+.env.local
+.env*.local
+.env.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Pruebas
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Caché
+.turbo
+.cache/
