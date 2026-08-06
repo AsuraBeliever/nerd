@@ -32,6 +32,8 @@ export function Modal({
   }, [open]);
 
   return (
+    // El equivalente con teclado es Escape, que `<dialog>` ya maneja nativamente.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape cubre el caso de teclado.
     <dialog
       ref={ref}
       onClose={onClose}

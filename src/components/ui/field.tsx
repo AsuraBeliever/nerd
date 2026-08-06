@@ -10,8 +10,13 @@ import { cn } from "@/lib/utils";
 const control =
   "w-full rounded-control border border-border bg-surface px-3 text-[15px] text-text placeholder:text-text-subtle disabled:opacity-50";
 
+/**
+ * `Label` es genérico: siempre se usa con `htmlFor` apuntando a un control,
+ * pero el enlace ocurre en quien lo usa (`Field`), no aquí.
+ */
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: el control lo enlaza `Field` con htmlFor.
     <label
       className={cn("block text-[13px] font-medium text-text-secondary", className)}
       {...props}
