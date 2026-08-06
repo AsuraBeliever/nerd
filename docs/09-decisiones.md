@@ -32,7 +32,7 @@ Formato: contexto → decisión → alternativas → consecuencias.
 **Contexto.** Hace falta un ORM con buenos tipos y migraciones, en entorno serverless.
 **Decisión.** Drizzle ORM + Drizzle Kit.
 **Alternativas.** Prisma; Kysely; SQL a mano.
-**Consecuencias.** ➕ Sin motor binario → arranques en frío rápidos en Vercel. ➕ SQL predecible y legible, importante para los agregados del gimnasio. ➖ Ecosistema y documentación menores que Prisma; menos herramientas visuales.
+**Consecuencias.** ➕ Sin motor binario → arranques en frío rápidos en Vercel. ➕ SQL predecible y legible, importante para los agregados del entrenamiento. ➖ Ecosistema y documentación menores que Prisma; menos herramientas visuales.
 
 ---
 
@@ -56,7 +56,7 @@ Formato: contexto → decisión → alternativas → consecuencias.
 
 ---
 
-## ADR-006 · Métricas del gimnasio calculadas, nunca almacenadas
+## ADR-006 · Métricas de entrenamiento calculadas, nunca almacenadas
 **5 ago 2026 · Aceptada**
 
 **Contexto.** 1RM estimado, volumen semanal, récords y rachas podrían guardarse precalculados.
@@ -69,7 +69,7 @@ Formato: contexto → decisión → alternativas → consecuencias.
 ## ADR-007 · `numeric` para pesos, nunca `float`
 **5 ago 2026 · Aceptada**
 
-**Contexto.** Los pesos del gimnasio llevan decimales (22.5 kg, 2.5 kg de incremento).
+**Contexto.** Los pesos del entrenamiento llevan decimales (22.5 kg, 2.5 kg de incremento).
 **Decisión.** `numeric(6,2)` en Postgres; en TypeScript se manejan como string y se convierten explícitamente.
 **Consecuencias.** ➕ Un récord personal nunca aparecerá como `100.00000000000001`. ➖ Requiere conversión explícita al calcular — se centraliza en `features/workouts/lib.ts`.
 
@@ -100,6 +100,45 @@ Formato: contexto → decisión → alternativas → consecuencias.
 **Contexto.** Se podría desarrollar todo en local y desplegar al final.
 **Decisión.** Se despliega a producción en cuanto exista el login, y cada fase posterior llega a producción tras la aprobación del usuario.
 **Consecuencias.** ➕ El usuario usa la app de verdad desde temprano y da retroalimentación sobre software real, no sobre maquetas. ➕ No hay un "gran deploy" riesgoso al final. ➖ Obliga a que cada fase quede realmente terminada antes de pasar a la siguiente — que es precisamente lo que se busca.
+
+---
+
+## ADR-011 · Toda masa se guarda en kilogramos; la unidad es solo visual
+**5 ago 2026 · Aceptada**
+
+**Contexto.** El usuario pidió que se pueda elegir entre kilos y libras.
+**Decisión.** La base de datos guarda **siempre kilogramos** (`weight_kg`). La preferencia `users.weight_unit` solo afecta cómo se muestran y se capturan los valores; la conversión ocurre en la frontera de la interfaz.
+**Alternativas.** Guardar en la unidad capturada junto con un campo de unidad; guardar ambas.
+**Consecuencias.** ➕ Cambiar de unidad a media historia no rompe ninguna gráfica ni récord: son los mismos datos vistos de otro modo. ➕ Todos los agregados en SQL suman una sola escala, sin convertir por fila. ➖ Hay que convertir en cada entrada y salida — se centraliza en `features/training/units.ts` y se cubre con pruebas de ida y vuelta. ➖ Redondeo visible en libras (2.5 kg → 5.51 lb): se resuelve con incrementos propios de cada unidad (2.5 kg / 5 lb) en vez de convertir el paso.
+
+---
+
+## ADR-012 · Configurable por el usuario, no codificado a la medida del cliente
+**5 ago 2026 · Aceptada**
+
+**Contexto.** Petición explícita del cliente: *"yo quiero que sea flexible y que el usuario pueda ponerlo como a él le convenga mejor, no solo como a mí me sirve ahorita, porque puede cambiar en un futuro."*
+**Decisión.** Ningún comportamiento del que un usuario pueda tener una opinión se fija en el código. Concretamente: los 7 días de la semana se soportan por igual (nada de asumir lunes a viernes), el inicio de semana, la zona horaria, el umbral mínimo de asistencia (global y por materia), cómo cuentan las justificadas y los retardos, la unidad de peso, el equipo de entrenamiento disponible, el tema, y los días visibles del horario.
+**Alternativas.** Codificar los valores del cliente y hacerlos configurables después.
+**Consecuencias.** ➕ La app sirve a otra persona con costumbres distintas sin tocar el código — y al propio cliente cuando cambie de escuela, de horario o de gimnasio. ➕ Evita la clase de suposición que envenena un producto ("aquí nadie tiene clases en sábado"). ➖ Más columnas de preferencias y más ramas en la lógica; el costo real está en la interfaz de Ajustes, que por eso tiene su propia fase (Fase 7). ➖ Toda función que dependa de una preferencia debe recibirla como parámetro, nunca leerla de una constante — es la regla que hace que esto se sostenga.
+
+---
+
+## ADR-013 · Calificaciones: columnas dormidas desde el día uno
+**5 ago 2026 · Aceptada**
+
+**Contexto.** El cliente dijo que no le interesan las calificaciones, *"pero déjalo abierto en caso de que alguien quiera o yo mismo cambie de opinión"*.
+**Decisión.** Las columnas (`tasks.grade`, `tasks.grade_weight_pct`, `courses.passing_grade`, `courses.grade_scale`) se crean desde la primera migración, pero **sin interfaz**. Se activan con el interruptor `users.track_grades`, que por defecto está apagado.
+**Alternativas.** No crearlas y agregarlas después con una migración; construir el módulo completo ahora.
+**Consecuencias.** ➕ "Dejarlo abierto" queda resuelto de verdad: activarlo después es escribir pantallas, no migrar datos de producción. ➕ Cero ruido visual para quien no las quiere. ➖ Cuatro columnas nulas sin uso — costo despreciable en Postgres. ➖ Hay que resistir la tentación de mostrarlas "porque ya están": no se activan hasta que el cliente las pida.
+
+---
+
+## ADR-014 · Repositorio público
+**5 ago 2026 · Aceptada**
+
+**Contexto.** Decisión del cliente durante la sesión 2: el repositorio será público.
+**Decisión.** Se hace público, con reglas escritas sobre qué nunca se commitea (`08-seguridad.md`) y con secret scanning y push protection activados en GitHub.
+**Consecuencias.** ➕ El código es auditable y sirve de portafolio. ➕ Ninguna protección real depende de que el código esté oculto: la seguridad descansa en el *client secret* de OAuth, el `AUTH_SECRET` y el aislamiento por `user_id`, no en el secreto del código. ➖ Un secreto commiteado por error se considera comprometido de inmediato, aunque se borre el commit — de ahí la regla de rotar primero y limpiar el historial después. ➖ La documentación no puede contener datos personales reales: todos los ejemplos son inventados. ➖ **Consecuencia inmediata:** se eliminó el correo del cliente de `CLAUDE.md` y se reescribió el commit inicial antes de abrir el repositorio.
 
 ---
 

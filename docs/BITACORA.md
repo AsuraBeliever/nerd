@@ -10,8 +10,9 @@
 | | |
 |---|---|
 | **Fase** | 0 — Cimientos (aún no iniciada) |
-| **Rama actual** | `main` |
+| **Rama actual** | `docs/attendance-and-preferences` |
 | **Versión** | 0.0.1 |
+| **Repositorio** | `github.com/AsuraBeliever/nerd` — **público** |
 | **Producción** | No desplegada todavía |
 | **Siguiente paso** | Rama `chore/scaffold`: crear el proyecto Next.js con todo el tooling |
 
@@ -24,6 +25,30 @@ Nada por ahora. En la **Fase 1** necesitaré que él cree tres cuentas (Neon, Go
 ---
 
 ## Sesiones
+
+### 2026-08-05 · Sesión 2 — Asistencia, flexibilidad y repo público
+**Rama:** `docs/attendance-and-preferences` · **Estado:** ✅ completada
+
+**Retroalimentación del cliente y qué cambió**
+
+| Lo que dijo | Qué se hizo |
+|---|---|
+| "Solo hago cosas desde casa" | El módulo se replanteó: **entrenamiento en casa como caso principal**. El progreso ahora se mide según el tipo de ejercicio — repeticiones y tiempo donde no hay carga, no solo kilos. Se renombró `gimnasio` → `entrenamiento` en todo el proyecto. |
+| "Que el usuario pueda elegir entre kilos o libras" | Preferencia `weight_unit`. Todo se guarda en kg y se convierte solo al mostrar (ADR-011). |
+| "Mi horario es fijo, no tengo clases los sábados, **pero eso no importa**, quiero que sea flexible" | ADR-012: nada codificado a la medida del cliente. Los 7 días valen igual, inicio de semana, días visibles, umbrales, unidades — todo configurable. Nueva **Fase 7 (Ajustes)**. |
+| "No me interesa registrar calificaciones, pero déjalo abierto" | Columnas **dormidas** desde la primera migración, sin interfaz, activables con `track_grades` (ADR-013). Abierto de verdad, sin costo hoy ni migración mañana. |
+| "Sí me interesa registrar faltas y poner el mínimo de asistencia, en mi caso 80%, pero déjalo a libre elección" | **Módulo nuevo completo:** tabla `attendance_records`, umbral configurable global y por materia, reglas de justificadas y retardos, y el cálculo de **faltas restantes** como cifra principal. Nueva **Fase 3**. |
+| "El repo va a ser público, ten cuidado con lo que publicas" | Nuevo `docs/08-seguridad.md` (ADR-014). Se eliminó el correo del cliente de `CLAUDE.md` y **se reescribió el commit inicial** antes de abrir el repo. Secret scanning y push protection activados. |
+
+**Otros cambios**
+- Roadmap pasó de 10 a 12 fases (0–11) por asistencia y ajustes.
+- Nueva ficha `docs/features/asistencia.md`; `gimnasio.md` → `entrenamiento.md`.
+- Se agregó `LICENSE` (MIT, a nombre de `AsuraBeliever` para no publicar el nombre legal).
+- Repositorio creado en GitHub.
+
+**Qué falta / siguiente paso**
+- Arrancar la Fase 0 (`chore/scaffold`).
+- Preguntas abiertas: si las justificadas cuentan como asistencia, si aplica "3 retardos = 1 falta", y qué equipo tiene en casa para precargar el catálogo correcto.
 
 ### 2026-08-05 · Sesión 1 — Planeación inicial
 **Rama:** `main` · **Estado:** ✅ completada

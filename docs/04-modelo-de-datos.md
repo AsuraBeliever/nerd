@@ -10,7 +10,8 @@ PostgreSQL 17. Esquema definido en TypeScript con Drizzle (`src/db/schema/`), mi
 
 ```
 users ─┬─ terms ── courses ─┬─ course_blocks
-       │                    └─ tasks ── subtasks
+       │                    ├─ tasks ── subtasks
+       │                    └─ attendance_records
        ├─ tasks (course_id NULL = pendiente personal)
        ├─ exercises
        ├─ routines ── routine_exercises ── exercises
@@ -30,10 +31,19 @@ Tablas estándar, creadas por el adaptador: **`users`**, **`accounts`**, **`sess
 |---|---|---|
 | `id` | `text` PK | UUID |
 | `name`, `email`, `image` | `text` | de Google |
-| `timezone` | `text` | por defecto `America/Mexico_City` |
-| `week_starts_on` | `smallint` | 1 = lunes (por defecto) |
+| `timezone` | `text` | detectada del navegador al registrarse, editable |
+| `week_starts_on` | `smallint` | 1 = lunes (por defecto), configurable |
+| `visible_weekdays` | `smallint[]` NULL | días visibles en el horario; `NULL` = se deducen de los bloques |
 | `theme` | `text` | `system` \| `light` \| `dark` |
+| `weight_unit` | enum | `kg` \| `lb` — **solo afecta cómo se ve**, no cómo se guarda |
+| `default_min_attendance_pct` | `numeric(5,2)` | 80.00 por defecto; cada materia puede sobrescribirlo |
+| `excused_counts_as_present` | `boolean` | si las faltas justificadas cuentan como asistencia |
+| `lates_per_absence` | `smallint` NULL | regla "N retardos = 1 falta"; `NULL` = los retardos no cuentan |
+| `track_grades` | `boolean` | `false` — muestra u oculta las columnas de calificación |
+| `available_equipment` | `text[]` NULL | filtra el catálogo de ejercicios; `NULL` = mostrar todo |
 | `created_at` | `timestamptz` | |
+
+Estas columnas son la implementación del principio de flexibilidad (ADR-012): **ningún comportamiento del que el usuario pueda tener una opinión está fijo en el código.**
 
 ---
 
@@ -64,6 +74,10 @@ Tablas estándar, creadas por el adaptador: **`users`**, **`accounts`**, **`sess
 | `room` | `text` NULL | salón por defecto |
 | `color` | `text` | token de la paleta (ver `05-diseno-ui.md`) |
 | `credits` | `smallint` NULL | |
+| `min_attendance_pct` | `numeric(5,2)` NULL | `NULL` = usar el valor global del usuario |
+| `expected_sessions_override` | `smallint` NULL | total de clases del semestre, si no se quiere estimar |
+| `passing_grade` | `numeric(5,2)` NULL | *(dormido — módulo de calificaciones)* |
+| `grade_scale` | `numeric(5,2)` NULL | escala máxima: 100, 10, 5… *(dormido)* |
 | `archived_at` | `timestamptz` NULL | |
 
 Índices: `(user_id, term_id)`.
@@ -85,6 +99,28 @@ Una materia puede tener varias sesiones semanales (lunes 7–9, miércoles 7–9
 Restricciones: `end_time > start_time`; `weekday` entre 1 y 7. Índice: `(user_id, weekday, start_time)`.
 
 *Decisión:* `time` sin zona horaria — un bloque de clase es "los lunes a las 7:00" en la vida real, no un instante absoluto. El traslape de horarios se valida en la aplicación (`features/schedule/lib.ts`), donde se puede dar un mensaje útil.
+
+### `attendance_records` — asistencia y faltas
+
+Un registro por **sesión de clase**, no por día: si una materia se ve dos veces el mismo día, son dos registros.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `user_id` | `text` FK | cascade |
+| `course_id` | `uuid` FK → courses | cascade |
+| `block_id` | `uuid` FK → course_blocks NULL | `SET NULL`; NULL para materias sin horario fijo |
+| `date` | `date` | día de la clase |
+| `status` | enum | `present` \| `absent` \| `late` \| `excused` \| `cancelled` |
+| `notes` | `text` NULL | motivo de la falta, por ejemplo |
+| `created_at` | `timestamptz` | |
+
+Único por `(course_id, date, block_id)` — una clase no puede registrarse dos veces.
+Índice: `(user_id, course_id, date DESC)`.
+
+**No existe el estado "sin registrar" como fila:** simplemente no hay registro. Asumir falta cuando el usuario olvidó marcar arruinaría sus números y sería injusto. Las sesiones sin registro quedan fuera del cálculo hasta que se llenen.
+
+`cancelled` sale del denominador por completo: no cuenta ni a favor ni en contra.
 
 ---
 
@@ -108,6 +144,8 @@ Una sola tabla para ambos. `course_id = NULL` significa pendiente personal.
 | `status` | enum | `todo` \| `doing` \| `done` |
 | `completed_at` | `timestamptz` NULL | |
 | `sort_order` | `integer` | orden manual en la lista |
+| `grade` | `numeric(5,2)` NULL | calificación obtenida *(dormido)* |
+| `grade_weight_pct` | `numeric(5,2)` NULL | cuánto pesa en la materia *(dormido)* |
 | `created_at`, `updated_at` | `timestamptz` | |
 
 Índices: `(user_id, status, due_at)` y `(user_id, course_id)`.
@@ -122,7 +160,7 @@ Una sola tabla para ambos. `course_id = NULL` significa pendiente personal.
 
 ---
 
-## Módulo de gimnasio
+## Módulo de entrenamiento
 
 ### `exercises` — catálogo
 
@@ -132,11 +170,12 @@ Una sola tabla para ambos. `course_id = NULL` significa pendiente personal.
 | `user_id` | `text` FK NULL | **NULL = ejercicio precargado del sistema** |
 | `name` | `text` | "Press de banca" |
 | `muscle_group` | enum | `chest` `back` `legs` `shoulders` `arms` `core` `cardio` `full_body` |
-| `equipment` | enum | `barbell` `dumbbell` `machine` `cable` `bodyweight` `other` |
+| `equipment` | enum | `bodyweight` `dumbbell` `resistance_band` `kettlebell` `pullup_bar` `barbell` `machine` `cable` `other` |
 | `tracking_type` | enum | `weight_reps` \| `reps_only` \| `time` \| `distance_time` |
+| `allows_added_weight` | `boolean` | ejercicio de peso corporal al que se le puede añadir carga |
 | `notes` | `text` NULL | |
 
-Se precarga un catálogo de ~60 ejercicios comunes en español (`db/seed.ts`) para que el usuario no empiece con la pantalla vacía. `tracking_type` permite registrar correctamente tanto sentadillas como plancha o correr.
+Se precarga un catálogo de ~60 ejercicios en español (`db/seed.ts`): **~35 hacen falta solo peso corporal, mancuernas o bandas** — el caso principal del cliente, que entrena en casa — y el resto son de gimnasio. `tracking_type` permite registrar correctamente tanto sentadillas con barra como lagartijas, plancha o correr. El enum de equipo está ordenado de "no necesito nada" a "necesito un gimnasio".
 
 ### `routines` — plantillas de entrenamiento
 
@@ -182,7 +221,8 @@ Es la tabla más importante del módulo: de aquí sale **todo** el progreso.
 | `user_id` | `text` FK | denormalizado, para agregados rápidos |
 | `set_number` | `smallint` | |
 | `reps` | `smallint` NULL | |
-| `weight_kg` | `numeric(6,2)` NULL | **numeric, no float** — 22.5 kg debe ser exactamente 22.5 |
+| `weight_kg` | `numeric(6,2)` NULL | **siempre en kg**, sin importar la unidad que el usuario vea (ADR-011). **numeric, no float** — 22.5 kg debe ser exactamente 22.5 |
+| `added_weight_kg` | `numeric(6,2)` NULL | carga extra en ejercicios de peso corporal (chaleco, mochila) |
 | `duration_seconds` | `integer` NULL | para plancha, cardio |
 | `distance_m` | `integer` NULL | |
 | `rpe` | `numeric(3,1)` NULL | esfuerzo percibido 1–10 |
@@ -205,14 +245,30 @@ Es la tabla más importante del módulo: de aquí sale **todo** el progreso.
 
 Nada de esto se guarda: se calcula en SQL desde `workout_sets`. Guardar agregados es garantía de datos inconsistentes.
 
+### Entrenamiento
+
 | Métrica | Fórmula |
 |---|---|
-| **Volumen de una serie** | `reps × weight_kg` |
+| **Volumen de una serie (con peso)** | `reps × weight_kg` |
+| **Volumen de una serie (peso corporal)** | `reps × (peso corporal + added_weight_kg)` si hay peso corporal registrado; si no, se cuentan repeticiones aparte |
 | **Volumen semanal** | suma del volumen por semana (excluye calentamiento) |
-| **1RM estimado** | Epley: `weight × (1 + reps / 30)` |
-| **Récord personal** | mayor peso a ≥1 rep, y mayor 1RM estimado, por ejercicio |
-| **Tendencia** | comparación del mejor 1RM estimado de las últimas 4 semanas vs. las 4 previas |
+| **1RM estimado** | Epley: `weight × (1 + reps / 30)` — solo para ejercicios con carga |
+| **Progreso sin carga** | mejor serie en repeticiones y repeticiones totales por sesión |
+| **Progreso por tiempo** | mejor duración sostenida |
+| **Récord personal** | mejor marca por ejercicio según su `tracking_type` |
+| **Tendencia** | últimas 4 semanas vs. las 4 previas |
 | **Racha** | semanas consecutivas con al menos un entrenamiento |
+
+### Asistencia
+
+| Métrica | Fórmula |
+|---|---|
+| **Sesiones consideradas** | registros del periodo − `cancelled` |
+| **Porcentaje actual** | `(present + excused*) / sesiones consideradas` — *`excused` cuenta según `excused_counts_as_present`* |
+| **Faltas efectivas** | `absent + ⌊late / lates_per_absence⌋` si la regla está activa |
+| **Sesiones totales estimadas** | `bloques semanales × semanas del semestre`, o `expected_sessions_override` |
+| **Faltas máximas permitidas** | `⌊ sesiones totales × (1 − mínimo requerido) ⌋` |
+| **Faltas restantes** | `faltas máximas − faltas efectivas` ← **la cifra que importa** |
 
 ---
 
@@ -224,6 +280,8 @@ Nada de esto se guarda: se calcula en SQL desde `workout_sets`. Guardar agregado
 4. Fechas siempre `timestamptz` (guardadas en UTC). Los horarios de clase usan `time` (hora local pura).
 5. Pesos y RPE en `numeric`, nunca `float`.
 6. Toda clave primaria es `uuid` — se puede generar en el cliente para escrituras optimistas.
+7. **Toda masa se guarda en kilogramos.** La unidad del usuario es una preferencia de visualización, nunca un formato de almacenamiento (ADR-011).
+8. **Columnas *dormidas*:** las de calificación (`tasks.grade`, `tasks.grade_weight_pct`, `courses.passing_grade`, `courses.grade_scale`) existen desde la primera migración pero no tienen interfaz. Se activan con `users.track_grades`. El cliente no quiere calificaciones hoy, pero pidió dejarlo abierto — así queda abierto sin costo ni migración futura (ADR-013).
 
 ## Convenciones
 

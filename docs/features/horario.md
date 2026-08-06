@@ -22,7 +22,7 @@ Es la base del resto de la app: las materias que se definen aquí son a las que 
 
 ### `/horario` — vista principal
 
-**Escritorio:** cuadrícula semanal. Columnas = días con clase (los días vacíos no se muestran, no tiene caso ocupar espacio). Filas = horas, desde la primera clase hasta la última del usuario, no de 0 a 24. Cada bloque muestra materia, hora, salón, en el color de la materia. La franja de la hora actual se marca con una línea sutil.
+**Escritorio:** cuadrícula semanal. Columnas = días con clase (los vacíos se ocultan por defecto, pero el usuario puede fijar qué días quiere ver siempre). Filas = horas, desde la primera clase hasta la última **de su horario**, no de 0 a 24. Cada bloque muestra materia, hora, salón, en el color de la materia. La franja de la hora actual se marca con una línea sutil.
 
 **Móvil:** un día a la vez, deslizable en horizontal, con la fecha arriba y puntos de navegación. Abre siempre en hoy (o en lunes si es fin de semana). Lista vertical de bloques, con la clase actual resaltada.
 
@@ -55,7 +55,7 @@ Aparece en el dashboard y arriba del horario en móvil. Tres estados:
 |---|---|
 | Clase que cruza la medianoche | No se soporta; se pide capturarla como dos bloques. Irrelevante para un horario universitario. |
 | Materia con distinto salón por día | El bloque tiene su propio campo de salón, que gana sobre el de la materia. |
-| Fin de semana sin clases | La vista de día muestra estado vacío; la semanal omite esos días. |
+| Días sin clases (fin de semana o cualquier otro) | La vista de día muestra estado vacío; la semanal los omite, salvo que el usuario los fije como visibles. |
 | Semestre sin materias | Estado vacío con botón "Agrega tu primera materia". |
 | Fuera del rango del semestre | El horario se sigue mostrando, con un aviso discreto de que el semestre ya terminó. |
 
@@ -72,8 +72,18 @@ En `features/schedule/lib.ts` (Vitest):
 
 Importar el horario desde un PDF · excepciones por día ("esta semana no hay clase") · sincronización con Google Calendar · recordatorios antes de cada clase. Todo va al backlog del roadmap.
 
-## Preguntas abiertas para el cliente
+## Respuestas del cliente (sesión 2)
 
-- ¿Tu horario cambia de semana a semana o es fijo? (el diseño asume fijo)
-- ¿Tienes clases en sábado?
-- ¿Quieres registrar créditos por materia, o sobra ese campo?
+- **Horario fijo**, igual todas las semanas. Las excepciones por día ("esta semana no hay clase") quedan en el backlog.
+- **Sin clases en sábado** — pero fue explícito: *"eso no importa, yo quiero que sea flexible y que el usuario pueda ponerlo como a él le convenga, no solo como a mí me sirve ahorita, porque puede cambiar en un futuro."*
+
+Por eso el diseño **no asume nada** sobre la semana:
+
+| Suposición tentadora | Lo que hacemos en su lugar |
+|---|---|
+| "La semana es de lunes a viernes" | Los 7 días se soportan por igual; los visibles se deducen de los bloques o se fijan a mano |
+| "La semana empieza en lunes" | `week_starts_on` configurable |
+| "Las clases van de 7:00 a 21:00" | El rango de la cuadrícula sale de los datos del usuario |
+| "Un semestre dura 6 meses" | Fechas de inicio y fin las pone el usuario |
+
+Es la aplicación concreta del ADR-012.

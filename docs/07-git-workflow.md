@@ -15,7 +15,7 @@
 main ─────●─────────●──────────────●────────►  producción (Vercel despliega de aquí)
            \       /                \
             ●──●──●                  ●──●──●   feat/…  (trabajo)
-            feat/class-schedule      feat/gym-tracking
+            feat/class-schedule      feat/training-tracking
 ```
 
 | Rama | Rol |
@@ -84,7 +84,7 @@ Así, meses después, retomar es leer una entrada de la bitácora y hacer `git s
 | `chore` | configuración, dependencias, tooling |
 | `wip` | trabajo incompleto en rama estacionada |
 
-Alcances del proyecto: `schedule` `courses` `tasks` `todos` `gym` `dashboard` `auth` `ui` `db` `docs` `ci`
+Alcances del proyecto: `schedule` `courses` `attendance` `tasks` `todos` `training` `dashboard` `settings` `auth` `ui` `db` `docs` `ci`
 
 Todo commit cierra con:
 
