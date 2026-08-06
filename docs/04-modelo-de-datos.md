@@ -36,11 +36,12 @@ Tablas estándar, creadas por el adaptador: **`users`**, **`accounts`**, **`sess
 | `visible_weekdays` | `smallint[]` NULL | días visibles en el horario; `NULL` = se deducen de los bloques |
 | `theme` | `text` | `system` \| `light` \| `dark` |
 | `weight_unit` | enum | `kg` \| `lb` — **solo afecta cómo se ve**, no cómo se guarda |
-| `default_min_attendance_pct` | `numeric(5,2)` | 80.00 por defecto; cada materia puede sobrescribirlo |
-| `excused_counts_as_present` | `boolean` | si las faltas justificadas cuentan como asistencia |
-| `lates_per_absence` | `smallint` NULL | regla "N retardos = 1 falta"; `NULL` = los retardos no cuentan |
+| `default_min_attendance_pct` | `numeric(5,2)` | `80.00` por defecto; cada materia puede sobrescribirlo |
+| `excused_counts_as_present` | `boolean` | `true` por defecto — si las justificadas cuentan como asistencia |
+| `track_lates` | `boolean` | `false` por defecto — si se registran retardos; apagado, el botón "Tarde" no aparece |
+| `lates_per_absence` | `smallint` NULL | regla "N retardos = 1 falta"; solo aplica con `track_lates = true` |
 | `track_grades` | `boolean` | `false` — muestra u oculta las columnas de calificación |
-| `available_equipment` | `text[]` NULL | filtra el catálogo de ejercicios; `NULL` = mostrar todo |
+| `available_equipment` | `text[]` | `['bodyweight']` por defecto; filtra el catálogo de ejercicios |
 | `created_at` | `timestamptz` | |
 
 Estas columnas son la implementación del principio de flexibilidad (ADR-012): **ningún comportamiento del que el usuario pueda tener una opinión está fijo en el código.**
@@ -264,8 +265,8 @@ Nada de esto se guarda: se calcula en SQL desde `workout_sets`. Guardar agregado
 | Métrica | Fórmula |
 |---|---|
 | **Sesiones consideradas** | registros del periodo − `cancelled` |
-| **Porcentaje actual** | `(present + excused*) / sesiones consideradas` — *`excused` cuenta según `excused_counts_as_present`* |
-| **Faltas efectivas** | `absent + ⌊late / lates_per_absence⌋` si la regla está activa |
+| **Porcentaje actual** | `(present + excused*) / sesiones consideradas` — *`excused` cuenta según `excused_counts_as_present`, activado por defecto* |
+| **Faltas efectivas** | `absent + ⌊late / lates_per_absence⌋` si `track_lates` está activo; si no, solo `absent` |
 | **Sesiones totales estimadas** | `bloques semanales × semanas del semestre`, o `expected_sessions_override` |
 | **Faltas máximas permitidas** | `⌊ sesiones totales × (1 − mínimo requerido) ⌋` |
 | **Faltas restantes** | `faltas máximas − faltas efectivas` ← **la cifra que importa** |

@@ -26,6 +26,28 @@ Nada por ahora. En la **Fase 1** necesitaré que él cree tres cuentas (Neon, Go
 
 ## Sesiones
 
+### 2026-08-05 · Sesión 3 — Defaults del cliente y arranque de la Fase 0
+**Rama:** `docs/attendance-and-preferences` → `main` · **Estado:** ✅ completada
+
+**Aprobación del cliente:** revisó y aprobó la rama de la sesión 2. Se integró a `main` con `--no-ff`.
+
+**Respuestas que se convirtieron en valores por defecto (nunca en constantes)**
+
+| Lo que dijo | Default | Configurable |
+|---|---|---|
+| "Las justificaciones sí cuentan como asistencias" | `excused_counts_as_present = true` | ✅ |
+| "No existen retardos, o tienes asistencia o no" | `track_lates = false` — el botón "Tarde" ni aparece | ✅ |
+| "En casa puro cuerpo, ejercicios básicos" | `available_equipment = ['bodyweight']` | ✅ |
+
+Reiteró la regla: *"déjalo libre para que cada quien lo pueda configurar a su manera, **siempre mantén en mente esa regla**"*. Se elevó a **sección 0 de `CLAUDE.md`**, arriba de todo lo demás, con la pregunta que debo hacerme antes de escribir cualquier condicional: *¿otra persona podría querer esto distinto?*
+
+Corolario nuevo de interfaz: cuando el usuario apaga una opción, **la interfaz se encoge**; no se queda con botones grises estorbando.
+
+**Qué falta / siguiente paso**
+- Fase 0 (`chore/scaffold`): montar el proyecto Next.js con todo el tooling.
+
+---
+
 ### 2026-08-05 · Sesión 2 — Asistencia, flexibilidad y repo público
 **Rama:** `docs/attendance-and-preferences` · **Estado:** ✅ completada
 

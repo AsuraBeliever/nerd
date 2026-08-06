@@ -35,20 +35,26 @@ Faltas restantes       = faltas máximas − faltas acumuladas
 
 **Ejemplo con el caso real del cliente:** materia con 2 clases por semana, semestre de 16 semanas = 32 sesiones. Mínimo 80% → puede faltar a 6 (`⌊32 × 0.20⌋`). Si lleva 2 faltas, la app dice: **"Te quedan 4 faltas"**.
 
-### Todo es configurable
-- **Mínimo global** en Ajustes: 80% por defecto, cambiable a cualquier valor entre 0 y 100.
-- **Mínimo por materia**: cada una puede tener el suyo y le gana al global. Hay maestros que piden 90% y otros a los que no les importa.
-- **¿Las justificadas cuentan?** Interruptor por usuario. En algunas escuelas cuentan como asistencia, en otras no.
-- **¿Los retardos cuentan como falta?** Configurable, incluyendo la regla común de "3 retardos = 1 falta", con el número ajustable.
+### Todo es configurable — con los valores por defecto del cliente
 
-Nada de esto está fijo en el código. Es el principio de flexibilidad del proyecto (ADR-012).
+| Ajuste | Por defecto | Rango |
+|---|---|---|
+| **Mínimo global** | 80% | cualquier valor de 0 a 100 |
+| **Mínimo por materia** | hereda el global | propio por materia; le gana al global |
+| **¿Las justificadas cuentan como asistencia?** | **Sí** | interruptor |
+| **¿Se registran retardos?** | **No** | interruptor; al apagarlo, el botón "Tarde" no aparece |
+| **¿Cuántos retardos hacen una falta?** | — | 2, 3, 4… cuando los retardos están activados |
+
+Los valores por defecto salen de la escuela del cliente: *"las justificaciones sí cuentan como asistencias, no existen retardos, o tienes asistencia o no"*. Pero fue explícito en que quedara libre — así que **son defaults, no reglas**. Alguien cuya escuela no acepte justificantes, o que maneje "3 retardos = 1 falta", lo cambia en Ajustes sin tocar el código (ADR-012).
+
+Consecuencia de diseño: con la configuración del cliente, la pantalla de registro muestra **dos botones** (asistí / falté), no tres. La interfaz se encoge cuando el usuario apaga cosas — no se queda con opciones muertas.
 
 ---
 
 ## Pantallas
 
 ### Registro rápido (en el horario y en el dashboard)
-Cada clase del día trae tres botones grandes: **✓ Asistí · ✗ Falté · ⏱ Tarde**. Un toque y listo, sin abrir nada.
+Cada clase del día trae botones grandes: **✓ Asistí · ✗ Falté**, y **⏱ Tarde** solo si el usuario activó los retardos. Un toque y listo, sin abrir nada. Marcar como justificada y cancelada se hace desde el detalle, que son casos menos frecuentes.
 
 Después de que termina una clase sin registro, aparece un recordatorio discreto en el dashboard: *"¿Fuiste a Cálculo hoy?"* con los mismos botones. Sin regaños ni insistencia; si se ignora, queda sin registrar y se puede llenar después.
 
@@ -114,7 +120,8 @@ En `features/attendance/lib.ts` (Vitest):
 
 Detección automática de asistencia por ubicación · justificantes con archivo adjunto · notificación al acercarse al límite (llega con el módulo de notificaciones) · importar días festivos del calendario escolar.
 
-## Preguntas abiertas para el cliente
+## Respuestas del cliente (sesión 3)
 
-- ¿En tu escuela las faltas justificadas cuentan como asistencia? (habrá interruptor, pero quiero saber cuál poner por defecto)
-- ¿Manejan la regla de "3 retardos = 1 falta"?
+- **Las justificadas sí cuentan como asistencia** → `excused_counts_as_present = true` por defecto.
+- **No existen los retardos**: *"o tienes asistencia o no"* → `track_lates = false` por defecto, y el botón "Tarde" no se muestra.
+- Ambas quedan configurables, por petición explícita suya.

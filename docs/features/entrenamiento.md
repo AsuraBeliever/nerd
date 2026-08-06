@@ -139,9 +139,16 @@ Esto es lo que hace que el módulo sirva entrenando en casa. Alguien que pasó d
 
 Nutrición y calorías · rutinas prearmadas tipo PPL · videos de técnica · comparar con otras personas · integración con relojes o wearables · periodización automática. Todo al backlog.
 
-## Preguntas abiertas para el cliente
+## Respuestas del cliente (sesión 3)
 
-- ¿Qué equipo tienes en casa? (mancuernas, banda, barra de dominadas, solo peso corporal) — define qué se precarga en tu catálogo.
+> "En casa puro cuerpo, hago ejercicios básicos, pero déjalo libre para que cualquier persona lo pueda usar aunque vaya al gym o lo que sea."
+
+- **Equipo por defecto: `['bodyweight']`.** Al entrar, el catálogo muestra solo ejercicios de peso corporal. Nada de prensa de piernas ni poleas estorbando.
+- **El catálogo completo se precarga de todos modos** — gimnasio incluido. No se recorta la base de datos: se filtra la vista. Activar mancuernas o un gimnasio entero desde Ajustes es un toque, sin migración ni pérdida de historial.
+- **Ejercicios básicos primero:** las lagartijas, sentadillas, plancha, zancadas y abdominales son los que se ven al abrir la app, no escondidos tras una búsqueda.
+- Esto refuerza por qué el progreso **no puede medirse solo en kilos** (ver arriba): con puro peso corporal, la única señal de mejora son las repeticiones, el tiempo sostenido y la dificultad de la variante.
+
+### Sigue abierto
 - ¿Haces algo de cardio, o solo fuerza?
-- ¿Quieres registrar RPE — qué tan pesada se sintió cada serie del 1 al 10 — o es demasiado al momento de capturar?
-- ¿Te interesa registrar tu peso corporal, o solo lo que haces?
+- ¿Quieres registrar RPE — qué tan pesada se sintió cada serie del 1 al 10 — o estorba al capturar?
+- ¿Te interesa registrar tu peso corporal? *(con puro peso corporal sirve doble: es la carga real de cada repetición)*
