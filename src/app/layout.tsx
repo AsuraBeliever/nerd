@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ServiceWorker } from "@/components/shared/service-worker";
 import { getCurrentUser } from "@/lib/session";
 
 const geistSans = Geist({
@@ -38,7 +39,10 @@ export default async function RootLayout({
 
   return (
     <html lang="es" data-theme={theme}>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }
