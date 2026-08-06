@@ -1,6 +1,6 @@
 {
   "name": "nerd",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "App web para organizar la universidad y el entrenamiento",
   "scripts": {
