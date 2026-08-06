@@ -1,0 +1,41 @@
+name: CI
+
+# En todas las ramas: si algo está roto, se sabe antes de que el cliente lo vea.
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Calidad
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Formato y lint (Biome)
+        run: npm run check:ci
+
+      - name: Tipos (TypeScript)
+        run: npm run typecheck
+
+      - name: Pruebas unitarias (Vitest)
+        run: npm test
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Vulnerabilidades en dependencias
+        run: npm audit --audit-level=high
+        continue-on-error: true

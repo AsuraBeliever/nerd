@@ -48,7 +48,7 @@ Si estás retomando el proyecto, lee en este orden:
 
 | | |
 |---|---|
-| **Stack** | Next.js 15 · TypeScript · Tailwind v4 · shadcn/ui · Drizzle · PostgreSQL (Neon) · Auth.js + Google |
+| **Stack** | Next.js 16 · TypeScript · Tailwind v4 · shadcn/ui · Drizzle · PostgreSQL (Neon) · Auth.js + Google |
 | **Hosting** | Vercel (producción) + Neon (base de datos) — ambos en plan gratuito |
 | **Usuarios** | Multiusuario, login con Google |
 | **Dispositivos** | Responsive completo (móvil + escritorio) + PWA instalable |

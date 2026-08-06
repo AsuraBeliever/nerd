@@ -10,7 +10,7 @@ Formato: contexto → decisión → alternativas → consecuencias.
 **5 ago 2026 · Aceptada**
 
 **Contexto.** Un desarrollador, proyecto personal de largo plazo, hosting gratuito.
-**Decisión.** Next.js 15 con App Router: Server Components para lecturas y Server Actions para escrituras.
+**Decisión.** Next.js 16 con App Router: Server Components para lecturas y Server Actions para escrituras.
 **Alternativas.** SPA + API REST/tRPC separada; Remix; SvelteKit.
 **Consecuencias.** ➕ Un solo despliegue, un solo repo, tipos compartidos de extremo a extremo, sin capa de API que mantener. ➖ Acoplamiento a Next.js; migrar después implicaría reescribir la capa de datos (riesgo aceptado: es una app personal, no un producto multiplataforma).
 
@@ -139,6 +139,52 @@ Formato: contexto → decisión → alternativas → consecuencias.
 **Contexto.** Decisión del cliente durante la sesión 2: el repositorio será público.
 **Decisión.** Se hace público, con reglas escritas sobre qué nunca se commitea (`08-seguridad.md`) y con secret scanning y push protection activados en GitHub.
 **Consecuencias.** ➕ El código es auditable y sirve de portafolio. ➕ Ninguna protección real depende de que el código esté oculto: la seguridad descansa en el *client secret* de OAuth, el `AUTH_SECRET` y el aislamiento por `user_id`, no en el secreto del código. ➖ Un secreto commiteado por error se considera comprometido de inmediato, aunque se borre el commit — de ahí la regla de rotar primero y limpiar el historial después. ➖ La documentación no puede contener datos personales reales: todos los ejemplos son inventados. ➖ **Consecuencia inmediata:** se eliminó el correo del cliente de `CLAUDE.md` y se reescribió el commit inicial antes de abrir el repositorio.
+
+---
+
+## ADR-015 · PostgreSQL local en Docker para desarrollo
+**6 ago 2026 · Aceptada**
+
+**Contexto.** Neon requiere que el cliente cree una cuenta, y el desarrollo no podía detenerse a esperar.
+**Decisión.** Un contenedor `postgres:17-alpine` propio (`nerd-postgres`, puerto 5433, volumen `nerd-pgdata`) para desarrollo. El mismo esquema y las mismas migraciones sirven en Neon sin cambios.
+**Alternativas.** PGlite embebido; SQLite; esperar a las credenciales de Neon.
+**Consecuencias.** ➕ Postgres real: los tipos `numeric`, `time` y las restricciones se comportan igual que en producción, no "casi igual". ➕ Se usó el puerto 5433 para no tocar el contenedor de otro proyecto que el cliente ya tenía en el 5432. ➖ Requiere Docker en la máquina de desarrollo. ➖ Para producción hay que cambiar `DATABASE_URL`, nada más: el driver `postgres-js` habla con ambos.
+
+---
+
+## ADR-016 · Acceso de desarrollo mientras no hay credenciales de Google
+**6 ago 2026 · Aceptada**
+
+**Contexto.** Todo lo que se construye detrás del login necesita una sesión para probarse, y el OAuth de Google depende de que el cliente cree el proyecto en Google Cloud.
+**Decisión.** Una ruta `POST /api/dev-login` que crea una **sesión real en la base de datos**, idéntica a la que crearía Google. Existe solo si `NODE_ENV !== "production"` **y** `DEV_LOGIN=true`; en producción responde 404 sin consultar nada.
+**Alternativas.** Detener el desarrollo; usar un proveedor de credenciales de Auth.js (obliga a sesiones JWT y cambiaría el diseño); simular la sesión en las pruebas.
+**Consecuencias.** ➕ Todo lo que corre después del login es exactamente el mismo código que en producción: nada queda sin probar. ➕ Permite pruebas end-to-end automatizadas, que con OAuth real serían imposibles. ➖ Es una puerta de entrada que **debe** seguir cerrada en producción; por eso la doble condición y la prueba E2E que verifica que sin sesión la app está cerrada. Al activar Google, se apaga borrando `DEV_LOGIN` del entorno.
+
+---
+
+## ADR-017 · Componentes propios sobre HTML nativo, en vez de shadcn/ui
+**6 ago 2026 · Reemplaza parcialmente la elección de `02-stack.md`**
+
+**Contexto.** El plan proponía shadcn/ui sobre Radix. Al construir, los componentes que la app realmente necesita resultaron ser: botón, campo de texto, select, y modal.
+**Decisión.** Escribirlos a mano sobre elementos nativos. El modal usa `<dialog>`, que ya trae atrapado de foco, cierre con Escape, capa de fondo y rol de accesibilidad.
+**Alternativas.** shadcn/ui + Radix como estaba planeado.
+**Consecuencias.** ➕ Cero dependencias de UI para funcionalidad que el navegador ya da bien. ➕ Los componentes son 30 líneas legibles en vez de capas de abstracción. ➖ Si más adelante hacen falta piezas complejas de verdad (combobox con búsqueda, menús anidados), se traerá Radix para esas y ya: la decisión no cierra la puerta.
+
+---
+
+## ADR-018 · Menos librerías de las planeadas
+**6 ago 2026 · Aceptada**
+
+Tres piezas del plan no se instalaron, cada una porque algo más simple resolvía el caso:
+
+| Planeado | Lo que se usó | Por qué |
+|---|---|---|
+| TanStack Query | `useOptimistic` de React 19 | Solo se necesitaban actualizaciones optimistas en dos pantallas, y React 19 ya las trae. Cero dependencias, cero caché que invalidar. |
+| Recharts | ~60 líneas de SVG en línea | Para una línea y unas barras sin cuadrícula ni leyendas, eran ~90 KB de JavaScript en el navegador a cambio de nada. Además se renderiza en el servidor. |
+| Serwist | Service worker escrito a mano | El caso es "cachear lo ya visitado". Son 50 líneas legibles frente a una capa de build completa. La escritura sin conexión sí justificaría Serwist, y está en el backlog. |
+| React Hook Form | Server Actions + Zod | Con `<form action={…}>` y validación en el servidor, la librería no aportaba nada. Se desinstaló al terminar. |
+
+**Consecuencia general.** ➕ Menos superficie de ataque, menos JavaScript en el celular, menos que actualizar. ➖ Si el proyecto crece hacia formularios muy dinámicos o gráficas interactivas, habrá que reconsiderar cada una — y este registro dice exactamente qué se descartó y por qué.
 
 ---
 

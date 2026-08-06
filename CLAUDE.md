@@ -134,7 +134,7 @@ El usuario pidió que **todo quede documentado**. No es opcional ni "si da tiemp
 
 ## 8. Stack (resumen — detalle completo en `docs/02-stack.md`)
 
-- **Framework:** Next.js 15 (App Router) + React 19 + TypeScript en modo estricto
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript en modo estricto
 - **Estilos:** Tailwind CSS v4 + shadcn/ui (minimalista, accesible)
 - **Base de datos:** PostgreSQL en Neon (plan gratuito)
 - **ORM:** Drizzle ORM + Drizzle Kit para migraciones
@@ -157,16 +157,15 @@ npm run check        # Biome: lint + formato
 npm run typecheck    # TypeScript sin emitir
 npm run test         # Vitest
 npm run test:e2e     # Playwright
-npm run db:generate  # generar migración a partir del schema
-npm run db:migrate   # aplicar migraciones
-npm run db:studio    # explorar la base de datos en el navegador
-npm run db:seed      # datos de ejemplo para desarrollo
 ```
+
+Desde la Fase 1, cuando entre Drizzle: `db:generate`, `db:migrate`, `db:studio`, `db:seed`.
 
 ---
 
 ## 10. Reglas de código
 
+- ⚠️ **Next.js 16 no es el Next.js que creo conocer.** Tiene cambios que rompen respecto a versiones anteriores: APIs, convenciones y estructura de archivos pueden diferir de lo que traigo aprendido. **Antes de escribir código de Next, consultar la guía correspondiente en `node_modules/next/dist/docs/`.** No dar por hecho nada de memoria.
 - TypeScript `strict`. **Prohibido `any`** — si no hay tipo, se modela con `unknown` + validación Zod.
 - Server Components por defecto; `"use client"` solo cuando hay interactividad real.
 - Mutaciones vía **Server Actions**, siempre con: validación Zod → verificación de sesión → verificación de propiedad del dato.

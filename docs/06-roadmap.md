@@ -1,5 +1,7 @@
 # 06 · Roadmap
 
+> **Estado: todas las fases terminadas (6 de agosto de 2026).** La v1.0.0 está construida y probada en local. Lo único que falta para producción son las tres cuentas que solo el cliente puede crear (Neon, Google Cloud, Vercel). Ver `BITACORA.md`.
+
 El usuario quiere todas las funcionalidades. El orden de abajo no es un recorte del alcance — es la secuencia que evita rehacer trabajo, porque **cada fase se apoya en la anterior**.
 
 Cada fase = **una rama**. Cada fase termina con: revisión del usuario en local → aprobación → merge a `main` → producción.
@@ -8,17 +10,17 @@ Una decisión importante: **se despliega a producción desde la Fase 1**, no al 
 
 ---
 
-## Fase 0 — Cimientos
+## ✅ Fase 0 — Cimientos
 **Rama:** `chore/scaffold`
 
-Proyecto Next.js 15 + TypeScript estricto · Tailwind v4 + shadcn/ui · Biome · Vitest + Playwright · estructura de carpetas de `03-arquitectura.md` · `.env.example` con valores falsos · GitHub Actions (typecheck + lint + tests) · protecciones del repo público (`08-seguridad.md`).
+Proyecto Next.js 16 + TypeScript estricto · Tailwind v4 + shadcn/ui · Biome · Vitest + Playwright · estructura de carpetas de `03-arquitectura.md` · `.env.example` con valores falsos · GitHub Actions (typecheck + lint + tests) · protecciones del repo público (`08-seguridad.md`).
 
 ✅ **Listo cuando:** `npm run dev` levanta una página, y typecheck, lint y tests pasan en verde.
 👀 **El usuario ve:** una página en blanco con la tipografía y colores del sistema de diseño. Poco, pero es el piso de todo.
 
 ---
 
-## Fase 1 — Cuenta y esqueleto
+## ✅ Fase 1 — Cuenta y esqueleto
 **Rama:** `feat/auth-google`
 
 Base de datos en Neon · esquema Drizzle de autenticación + primeras migraciones · Auth.js v5 con Google · `requireUser()` · landing pública · layout de la app con navegación (lateral en escritorio, barra inferior en móvil) · ajustes básicos (tema, zona horaria detectada del navegador) · **despliegue a producción en Vercel** · prueba E2E de aislamiento entre usuarios.
@@ -29,7 +31,7 @@ Base de datos en Neon · esquema Drizzle de autenticación + primeras migracione
 
 ---
 
-## Fase 2 — Horario escolar
+## ✅ Fase 2 — Horario escolar
 **Rama:** `feat/class-schedule`
 
 Semestres · materias (nombre, clave, profesor, salón, color) · bloques de horario · **los 7 días soportados por igual**, con los días visibles configurables · validación de traslapes · cuadrícula semanal en escritorio y vista por día deslizable en móvil · widget "clase actual / siguiente" · archivar semestre.
@@ -39,7 +41,7 @@ Semestres · materias (nombre, clave, profesor, salón, color) · bloques de hor
 
 ---
 
-## Fase 3 — Asistencia y faltas
+## ✅ Fase 3 — Asistencia y faltas
 **Rama:** `feat/attendance`
 
 Registro de asistencia por sesión de clase (asistí / falté / tarde / justificada / cancelada) desde el horario con un toque · **porcentaje mínimo configurable, global y por materia** · cálculo de **faltas restantes** · semáforo de riesgo · vista de resumen por semestre · reglas configurables de justificadas y retardos.
@@ -51,7 +53,7 @@ Va justo después del horario porque se cuelga de los bloques de clase, y porque
 
 ---
 
-## Fase 4 — Tareas y exámenes
+## ✅ Fase 4 — Tareas y exámenes
 **Rama:** `feat/academic-tasks`
 
 Tabla `tasks` · crear/editar/completar tareas ligadas a materia · tipos (tarea, examen, proyecto, lectura) · fechas con o sin hora · prioridad · subtareas · vista por materia y vista de próximos vencimientos · fechas en lenguaje natural con color de urgencia · captura rápida.
@@ -61,7 +63,7 @@ Tabla `tasks` · crear/editar/completar tareas ligadas a materia · tipos (tarea
 
 ---
 
-## Fase 5 — Pendientes generales
+## ✅ Fase 5 — Pendientes generales
 **Rama:** `feat/personal-todos`
 
 Sección propia para pendientes sin materia · reordenar arrastrando · agrupación por fecha · completar con deshacer.
@@ -72,7 +74,7 @@ Fase corta y de bajo riesgo: reutiliza toda la maquinaria de la Fase 4 (misma ta
 
 ---
 
-## Fase 6 — Dashboard "Hoy"
+## ✅ Fase 6 — Dashboard "Hoy"
 **Rama:** `feat/dashboard`
 
 Clases de hoy con la actual resaltada · registro rápido de asistencia de las clases que ya pasaron · lo que vence hoy y esta semana · pendientes personales del día · resumen de entrenamiento · alerta si alguna materia está cerca del límite de faltas.
@@ -83,7 +85,7 @@ Va aquí, y no antes, porque un dashboard solo puede diseñarse bien cuando ya e
 
 ---
 
-## Fase 7 — Ajustes y preferencias
+## ✅ Fase 7 — Ajustes y preferencias
 **Rama:** `feat/settings`
 
 La fase donde se cumple la petición del cliente de que **todo sea a libre elección**, no solo lo que a él le sirve hoy:
@@ -94,7 +96,7 @@ Unidad de peso (kg/lb) · porcentaje mínimo de asistencia global · reglas de j
 
 ---
 
-## Fase 8 — Entrenamiento: catálogo y rutinas
+## ✅ Fase 8 — Entrenamiento: catálogo y rutinas
 **Rama:** `feat/training-foundation`
 
 Tablas de ejercicios y rutinas · catálogo precargado de ~60 ejercicios en español, **con el entrenamiento en casa como caso principal** (peso corporal, mancuernas, bandas) · filtro por equipo disponible · ejercicios propios · crear rutinas con objetivos · duplicar rutina.
@@ -103,7 +105,7 @@ Tablas de ejercicios y rutinas · catálogo precargado de ~60 ejercicios en espa
 
 ---
 
-## Fase 9 — Entrenamiento: registrar
+## ✅ Fase 9 — Entrenamiento: registrar
 **Rama:** `feat/training-tracking`
 
 **La pantalla más importante del módulo.** Sesión desde rutina o libre · registro de series con actualización optimista · precarga de los valores de la última vez · temporizador de descanso · calentamiento · récord personal detectado en el momento · historial · peso corporal · incrementos correctos según la unidad elegida.
@@ -112,7 +114,7 @@ Tablas de ejercicios y rutinas · catálogo precargado de ~60 ejercicios en espa
 
 ---
 
-## Fase 10 — Entrenamiento: progreso
+## ✅ Fase 10 — Entrenamiento: progreso
 **Rama:** `feat/training-progress`
 
 Aquí se cumple lo que el usuario pidió: *"ver cómo voy mejorando o empeorando"*.
@@ -123,7 +125,7 @@ El detalle de por qué esto importa entrenando en casa está en la ficha.
 
 ---
 
-## Fase 11 — PWA, pulido y v1.0.0
+## ✅ Fase 11 — PWA, pulido y v1.0.0
 **Rama:** `chore/pwa-and-polish`
 
 Serwist: instalable en pantalla de inicio, caché offline de lo ya visto · íconos y splash · optimización hasta Lighthouse ≥ 95 · pruebas E2E de los caminos críticos · repaso de accesibilidad · repaso de seguridad completo contra `08-seguridad.md` · `CHANGELOG.md` y etiqueta **`v1.0.0`**.
