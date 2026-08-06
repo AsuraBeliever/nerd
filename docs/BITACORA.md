@@ -9,12 +9,20 @@
 
 | | |
 |---|---|
-| **Fase** | 0 — Cimientos ✅ terminada, esperando revisión del cliente |
-| **Rama actual** | `chore/scaffold` |
-| **Versión** | 0.0.1 |
+| **Fase** | ✅ **Todas (0–11) terminadas** |
+| **Rama actual** | `feat/foundation` (contiene las fases 1–11) |
+| **Versión** | 1.0.0 |
 | **Repositorio** | `github.com/AsuraBeliever/nerd` — **público** |
-| **Producción** | No desplegada todavía |
-| **Siguiente paso** | Aprobación del cliente en local → merge a `main` → Fase 1 (`feat/auth-google`) |
+| **Producción** | No desplegada todavía — falta que el cliente cree las cuentas |
+| **Pruebas** | 124 unitarias + 18 end-to-end (escritorio y móvil), todas en verde |
+| **Siguiente paso** | Cliente crea Neon, Google Cloud OAuth y Vercel → primer despliegue |
+
+### Lo que falta para producción (requiere al cliente)
+1. **Neon** — crear base de datos y darme la cadena de conexión.
+2. **Google Cloud Console** — crear el ID y el secreto de OAuth.
+3. **Vercel** — conectar el repositorio.
+
+Al activar Google se borra `DEV_LOGIN` del entorno y el acceso de desarrollo deja de existir.
 
 ### Ramas estacionadas
 Ninguna.
@@ -25,6 +33,38 @@ Nada por ahora. En la **Fase 1** necesitaré que él cree tres cuentas (Neon, Go
 ---
 
 ## Sesiones
+
+### 2026-08-06 · Sesión 4 — Fases 1 a 11, la app completa
+**Rama:** `feat/foundation` · **Estado:** ✅ completada
+
+El cliente pidió no parar hasta terminar todas las fases, con páginas dedicadas por módulo. Se construyó todo de corrido, verificando cada fase antes de pasar a la siguiente.
+
+**Lo construido, por fase**
+
+| Fase | Qué quedó |
+|---|---|
+| 1 · Cuenta y esqueleto | 16 tablas, Auth.js con sesiones en base de datos, `requireUser`, layout con barra lateral y barra inferior |
+| 2 · Horario | Semestres, materias, bloques, detección de traslapes, cuadrícula semanal y vista por día |
+| 3 · Asistencia | Registro de un toque, faltas restantes, semáforo, reglas configurables |
+| 4 y 5 · Tareas y pendientes | Una tabla, dos secciones; agrupación por urgencia; subtareas |
+| 6 · Hoy | Todo el día en un solo viaje al servidor |
+| 7 · Ajustes | Todas las preferencias + exportar datos |
+| 8, 9 y 10 · Entrenamiento | Catálogo, rutinas, registro de sesión y progreso por tipo de ejercicio |
+| 11 · PWA y pulido | Manifiesto, service worker, páginas de error, pruebas E2E |
+
+**Decisiones nuevas** — ADR-015 a ADR-018: Postgres local en Docker (puerto 5433 para no chocar con el contenedor que el cliente ya tenía), acceso de desarrollo mientras no hay OAuth, componentes propios sobre HTML nativo, y menos librerías de las planeadas (sin TanStack Query, sin Recharts, sin Serwist, sin React Hook Form).
+
+**Bugs encontrados por las pruebas, no por casualidad**
+1. **Faltas máximas con flotantes**: `30 × (1 − 90/100)` daba 2.9999999999999996 y le quitaba una falta al usuario. Ahora se calcula con enteros.
+2. **Semáforo de asistencia injusto**: se basaba en el porcentaje del momento, así que marcaba rojo a quien faltó 4 de 14 clases aunque todavía pudiera terminar el semestre al 87%. Ahora manda cuántas faltas quedan.
+3. **Fechas de entrega en la zona equivocada**: se interpretaban en la zona del servidor, así que una entrega a las 11:30 pm podía caer al día siguiente y moverse sola al editarla.
+4. **Desmarcar asistencia guardaba "cancelada"** en vez de borrar el registro, que significa otra cosa en el cálculo.
+
+**Qué falta / siguiente paso**
+- Las tres cuentas del cliente para desplegar a producción.
+- Backlog: notificaciones, calificaciones (la base de datos ya está lista), importar horario desde PDF, escritura sin conexión.
+
+---
 
 ### 2026-08-05 · Fase 0 — Cimientos
 **Rama:** `chore/scaffold` · **Estado:** 🚧 esperando revisión del cliente en local

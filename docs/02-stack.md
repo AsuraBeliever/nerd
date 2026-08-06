@@ -12,19 +12,19 @@ Cada decisión aquí la tomé yo (developer) y está justificada. El criterio ge
 | UI | React | 19.x |
 | Lenguaje | TypeScript (strict) | 5.x |
 | Estilos | Tailwind CSS | v4 |
-| Componentes | shadcn/ui (Radix UI) | latest |
-| Base de datos | PostgreSQL en Neon | 17 |
+| Componentes | Propios, sobre HTML nativo (ADR-017) | — |
+| Base de datos | PostgreSQL — Docker en local, Neon en producción (ADR-015) | 17 |
 | ORM | Drizzle ORM + Drizzle Kit | latest |
 | Autenticación | Auth.js (NextAuth) v5 + Google | 5.x |
 | Validación | Zod | 4.x |
-| Estado servidor | Server Actions + TanStack Query | 5.x |
-| Formularios | React Hook Form | 7.x |
-| Gráficas | Recharts | 2.x |
-| Fechas | date-fns + date-fns-tz | 4.x |
+| Estado servidor | Server Actions + `useOptimistic` (ADR-018) | React 19 |
+| Formularios | `<form action>` + Zod en el servidor (ADR-018) | — |
+| Gráficas | SVG en línea, escrito a mano (ADR-018) | — |
+| Fechas | date-fns + @date-fns/tz | 4.x |
 | Lint / formato | Biome | 2.x |
 | Tests unitarios | Vitest | 3.x |
 | Tests E2E | Playwright | latest |
-| PWA / offline | Serwist | latest |
+| PWA / offline | Service worker propio (ADR-018) | — |
 | Hosting | Vercel | — |
 | CI | GitHub Actions | — |
 
@@ -42,12 +42,16 @@ Una sola base de código para frontend y backend. Los **Server Components** deja
 ### TypeScript estricto
 Un modelo de datos con relaciones (materia → bloques → tareas, rutina → ejercicios → series) se vuelve inmanejable sin tipos. Con Drizzle, los tipos salen del esquema de la base de datos automáticamente: si cambio una columna, el compilador me dice qué se rompió.
 
-### Tailwind CSS v4 + shadcn/ui
-El usuario pidió minimalismo. Tailwind da control total sin escribir CSS suelto que se pudre. shadcn/ui **no es una librería de componentes** — copia el código de cada componente dentro del proyecto, sobre Radix UI (accesibilidad seria: teclado, lectores de pantalla, foco). Eso significa cero dependencia externa de estilos y libertad total para desnudarlos hasta el mínimo. Es la combinación exacta para "minimalista pero bien hecho".
+### Tailwind CSS v4 + componentes propios
+El usuario pidió minimalismo. Tailwind da control total sin escribir CSS suelto que se pudre.
+
+El plan proponía shadcn/ui sobre Radix. Al construir resultó que los componentes que la app de verdad necesita son cuatro —botón, campo, select y modal— y todos existen ya en HTML: el modal usa `<dialog>`, que trae atrapado de foco, cierre con Escape y rol de accesibilidad de fábrica. Se escribieron a mano, 30 líneas cada uno (**ADR-017**). Si algún día hace falta un combobox con búsqueda, se traerá Radix para esa pieza.
 
 *Alternativas descartadas:* Material UI (opinionado y pesado, imposible de hacer minimalista); Chakra (runtime CSS-in-JS, más lento); CSS puro (no escala).
 
-### PostgreSQL en Neon
+### PostgreSQL — Docker en local, Neon en producción
+En desarrollo corre un contenedor propio (`nerd-postgres`, puerto 5433) para no depender de que existan credenciales de Neon, y para no tocar el Postgres que el cliente ya tenía en el 5432 (**ADR-015**). Es el mismo Postgres 17: las migraciones y los tipos se comportan igual en los dos lados, y pasar a producción es cambiar `DATABASE_URL`.
+
 Nuestros datos son profundamente relacionales. Postgres además nos da tipos que importan aquí: `time` para bloques de horario, `timestamptz` para fechas correctas entre zonas horarias, `numeric` exacto para los pesos del entrenamiento (nada de errores de punto flotante en un PR). Neon ofrece Postgres serverless con plan gratuito real, escala a cero cuando no se usa, y da **ramas de base de datos** — una copia instantánea de los datos por rama de git, perfecta para el flujo de trabajo que definimos.
 
 *Alternativas descartadas:* Supabase (trae de más: auth propia, storage, realtime — no lo necesitamos y complica); SQLite/Turso (bueno, pero Postgres es el destino natural); MongoDB (mal ajuste para datos relacionales).
@@ -60,18 +64,16 @@ El esquema se define en TypeScript y de ahí salen tanto los tipos como las migr
 ### Auth.js v5 + Google OAuth
 El usuario pidió login con Google. Auth.js es el estándar del ecosistema Next.js, tiene adaptador oficial de Drizzle (las tablas de sesión se crean solas) y deja la puerta abierta a agregar GitHub o correo después sin rehacer nada. Sesiones en base de datos, no solo JWT, para poder cerrar sesión de verdad.
 
-### Zod + React Hook Form
-Un solo esquema de validación que se usa en el formulario del navegador **y** en el servidor. Imposible que se desincronicen. React Hook Form mantiene los formularios rápidos (sin re-render en cada tecla), que importa en el registro de series del entrenamiento, donde se escribe mucho y rápido.
+### Zod, sin librería de formularios
+Un solo esquema de validación que corre en el servidor, siempre, aunque el navegador ya haya validado. Los formularios usan `<form action={…}>` con Server Actions: React Hook Form estaba en el plan, se instaló, no se usó nunca y se desinstaló al terminar (**ADR-018**).
 
-### TanStack Query (uso acotado)
-La mayoría de la app usa Server Components y no necesita estado de cliente. Pero dos pantallas sí: **marcar tareas como hechas** y **registrar series del entrenamiento** — ahí queremos que la interfaz responda al instante (actualización optimista) aunque la red esté lenta. TanStack Query resuelve exactamente eso. No se usa en ningún otro lado.
+### Actualizaciones optimistas con React 19
+Dos pantallas necesitan responder al instante aunque la red vaya lenta: **completar una tarea** y **registrar una serie**. React 19 trae `useOptimistic`, que hace exactamente eso. TanStack Query estaba en el plan y resultó innecesario (**ADR-018**).
 
-### Recharts
-Gráficas declarativas en React, responsivas, y estilizables hasta quedar minimalistas (sin cuadrículas, sin bordes, solo la línea y los ejes). Suficiente para líneas de progreso, barras de volumen semanal y mapas de calor de asistencia.
+### Gráficas en SVG, escritas a mano
+Una línea y unas barras, sin cuadrícula ni leyendas. Son ~60 líneas que se renderizan en el servidor y usan los tokens del sistema de diseño. Recharts habría sido ~90 KB de JavaScript en el celular a cambio de nada (**ADR-018**).
 
-*Alternativa descartada:* Chart.js (canvas, menos integrado con React); D3 puro (poder de sobra, costo de desarrollo alto).
-
-### date-fns + date-fns-tz
+### date-fns + @date-fns/tz
 Manejo de fechas modular (solo se importa lo que se usa) e inmutable. La zona horaria importa: un examen "el viernes a las 7pm" debe seguir siendo viernes 7pm sin importar dónde se abra la app. Regla del proyecto: **guardar en UTC, mostrar en la zona del usuario**.
 
 ### Biome
@@ -80,8 +82,8 @@ Reemplaza ESLint + Prettier con una sola herramienta escrita en Rust: una config
 ### Vitest + Playwright
 Vitest para la lógica que puede romperse en silencio: detección de traslapes de horario, cálculo de 1RM estimado, agregación de volumen semanal, cálculo de rachas. Playwright para los caminos críticos completos: iniciar sesión, crear materia, marcar tarea, registrar entrenamiento.
 
-### Serwist (PWA)
-El usuario está en el celular, en la escuela y entrenando — donde el WiFi es malo. Serwist es el sucesor mantenido de Workbox para Next.js: instalable en la pantalla de inicio y con caché offline de lo ya visto. La escritura offline con sincronización posterior queda para una fase posterior, documentada como tal.
+### PWA con un service worker propio
+El usuario está en el celular, en la escuela y entrenando — donde el WiFi es malo. La app es instalable y abre sin conexión lo que ya se visitó. Son ~50 líneas legibles en `public/sw.js`; Serwist estaba en el plan y traía una capa de build completa para un caso que no la pide (**ADR-018**). La escritura sin conexión con sincronización posterior sí la justificaría, y está en el backlog.
 
 ### Vercel + GitHub Actions
 Vercel: deploy automático desde `main`, HTTPS y dominio incluidos, plan gratuito suficiente. GitHub Actions corre typecheck, lint y tests en cada rama — si algo está roto, se sabe antes de que el usuario lo vea.
@@ -94,11 +96,12 @@ Todas documentadas en `.env.example` con valores falsos. Las reales viven en `.e
 
 | Variable | Para qué |
 |---|---|
-| `DATABASE_URL` | Conexión a Postgres (Neon) |
+| `DATABASE_URL` | Conexión a Postgres (Docker en local, Neon en producción) |
 | `AUTH_SECRET` | Firma de sesiones |
 | `AUTH_GOOGLE_ID` | Client ID de Google OAuth |
 | `AUTH_GOOGLE_SECRET` | Client Secret de Google OAuth |
 | `AUTH_URL` | URL base de la app |
+| `DEV_LOGIN` | Solo desarrollo: acceso sin Google (ADR-016). No existe en producción. |
 
 ## Lo que el usuario tendrá que hacer con su cuenta
 

@@ -22,7 +22,6 @@
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",
     "@date-fns/tz": "^1.5.0",
-    "@hookform/resolvers": "^5.7.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
@@ -33,7 +32,6 @@
     "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-hook-form": "^7.84.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"

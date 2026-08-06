@@ -1,5 +1,5 @@
-import { config } from "dotenv";
 import react from "@vitejs/plugin-react";
+import { config } from "dotenv";
 import { defineConfig } from "vitest/config";
 
 // Las pruebas de aislamiento hablan con una base de datos real; el resto no
