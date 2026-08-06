@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { getCurrentUser } from "@/lib/session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +26,18 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // El tema se resuelve en el servidor: así la página llega ya pintada y no
+  // hay parpadeo de claro a oscuro al cargar.
+  const user = await getCurrentUser();
+  const theme = user?.theme === "system" ? undefined : user?.theme;
+
   return (
-    <html lang="es">
+    <html lang="es" data-theme={theme}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
     </html>
   );
