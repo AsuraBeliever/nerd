@@ -13,7 +13,7 @@ App web para organizar la universidad y el entrenamiento: **horario escolar**, *
 
 ## Stack
 
-Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Drizzle ORM · PostgreSQL (Neon) · Auth.js + Google · Vercel
+Next.js 16 · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Drizzle ORM · PostgreSQL (Neon) · Auth.js + Google · Vercel
 
 ## Documentación
 

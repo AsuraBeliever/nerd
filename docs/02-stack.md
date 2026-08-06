@@ -8,7 +8,7 @@ Cada decisión aquí la tomé yo (developer) y está justificada. El criterio ge
 
 | Capa | Elección | Versión |
 |---|---|---|
-| Framework | Next.js (App Router) | 15.x |
+| Framework | Next.js (App Router) | 16.x |
 | UI | React | 19.x |
 | Lenguaje | TypeScript (strict) | 5.x |
 | Estilos | Tailwind CSS | v4 |
@@ -32,10 +32,12 @@ Cada decisión aquí la tomé yo (developer) y está justificada. El criterio ge
 
 ## Justificación pieza por pieza
 
-### Next.js 15 + React 19
+### Next.js 16 + React 19
 Una sola base de código para frontend y backend. Los **Server Components** dejan que el horario y las listas se rendericen en el servidor consultando la base de datos directamente — sin API REST intermedia, sin estados de carga innecesarios. Las **Server Actions** cubren las mutaciones (crear tarea, registrar serie) sin escribir endpoints. Además, Vercel es su creador: el deploy es literalmente conectar el repo.
 
 *Alternativas descartadas:* Remix (excelente, pero menor ecosistema de componentes); SvelteKit (menos maduro para lo que necesitamos); SPA + API separada (dos proyectos que mantener, sin ganancia aquí).
+
+> **Nota de la Fase 0.** El plan original decía Next.js 15; al montar el proyecto, la versión estable era la **16.3**. Se usó la 16. Trae cambios que rompen respecto a la 15, así que la documentación de referencia es la que viene incluida en `node_modules/next/dist/docs/`, no la memoria ni tutoriales viejos.
 
 ### TypeScript estricto
 Un modelo de datos con relaciones (materia → bloques → tareas, rutina → ejercicios → series) se vuelve inmanejable sin tipos. Con Drizzle, los tipos salen del esquema de la base de datos automáticamente: si cambio una columna, el compilador me dice qué se rompió.

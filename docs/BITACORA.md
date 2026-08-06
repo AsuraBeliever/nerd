@@ -9,12 +9,12 @@
 
 | | |
 |---|---|
-| **Fase** | 0 — Cimientos (aún no iniciada) |
-| **Rama actual** | `docs/attendance-and-preferences` |
+| **Fase** | 0 — Cimientos ✅ terminada, esperando revisión del cliente |
+| **Rama actual** | `chore/scaffold` |
 | **Versión** | 0.0.1 |
 | **Repositorio** | `github.com/AsuraBeliever/nerd` — **público** |
 | **Producción** | No desplegada todavía |
-| **Siguiente paso** | Rama `chore/scaffold`: crear el proyecto Next.js con todo el tooling |
+| **Siguiente paso** | Aprobación del cliente en local → merge a `main` → Fase 1 (`feat/auth-google`) |
 
 ### Ramas estacionadas
 Ninguna.
@@ -25,6 +25,32 @@ Nada por ahora. En la **Fase 1** necesitaré que él cree tres cuentas (Neon, Go
 ---
 
 ## Sesiones
+
+### 2026-08-05 · Fase 0 — Cimientos
+**Rama:** `chore/scaffold` · **Estado:** 🚧 esperando revisión del cliente en local
+
+**Qué se montó**
+- Next.js **16.3** + React 19 + TypeScript estricto (`noUncheckedIndexedAccess`, `noImplicitOverride`, sin `any`).
+- Tailwind CSS v4 con el sistema de diseño de `05-diseno-ui.md` traducido a tokens: neutros, un acento, 3 semánticos y las 8 materias, en claro y oscuro.
+- Biome (lint + formato), Vitest (4 pruebas pasando), Playwright (2 pruebas de humo, escritorio y móvil).
+- Estructura de carpetas de `03-arquitectura.md`.
+- `.env.example` con valores falsos · CI en GitHub Actions (lint, tipos, tests, build, audit).
+- Página provisional que muestra el sistema de diseño funcionando.
+
+**Verificado**
+`npm run check:ci` ✅ · `npm run typecheck` ✅ · `npm test` 4/4 ✅ · `npm run build` ✅ · `localhost:3000` responde 200 en 31 ms.
+
+**Decisiones de la fase**
+- **Next.js 16, no 15.** El plan decía 15; la estable al momento de montar es la 16.3. Trae cambios que rompen respecto a la 15 → se anotó en `CLAUDE.md` §10 que la referencia es `node_modules/next/dist/docs/`, no la memoria. Docs actualizadas.
+- `next dev` añade solo un bloque de instrucciones al final de `CLAUDE.md`. Se desactivó con `agentRules: false`: ese archivo es el contrato con el cliente, no un generado. La advertencia útil se conservó, escrita a mano.
+- `globals.css` se excluye de Biome: su parser de CSS todavía no entiende las at-rules de Tailwind v4 (`@theme`, `@custom-variant`). El build de Tailwind sí lo valida.
+- Se borraron los SVG de ejemplo de create-next-app.
+
+**Qué falta / siguiente paso**
+- Revisión del cliente en `localhost:3000` → merge a `main`.
+- Fase 1 (`feat/auth-google`): Neon, Drizzle, Auth.js con Google y primer despliegue a producción. Ahí le pido al cliente las tres cuentas.
+
+---
 
 ### 2026-08-05 · Sesión 3 — Defaults del cliente y arranque de la Fase 0
 **Rama:** `docs/attendance-and-preferences` → `main` · **Estado:** ✅ completada

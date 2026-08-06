@@ -11,7 +11,7 @@ Una decisión importante: **se despliega a producción desde la Fase 1**, no al 
 ## Fase 0 — Cimientos
 **Rama:** `chore/scaffold`
 
-Proyecto Next.js 15 + TypeScript estricto · Tailwind v4 + shadcn/ui · Biome · Vitest + Playwright · estructura de carpetas de `03-arquitectura.md` · `.env.example` con valores falsos · GitHub Actions (typecheck + lint + tests) · protecciones del repo público (`08-seguridad.md`).
+Proyecto Next.js 16 + TypeScript estricto · Tailwind v4 + shadcn/ui · Biome · Vitest + Playwright · estructura de carpetas de `03-arquitectura.md` · `.env.example` con valores falsos · GitHub Actions (typecheck + lint + tests) · protecciones del repo público (`08-seguridad.md`).
 
 ✅ **Listo cuando:** `npm run dev` levanta una página, y typecheck, lint y tests pasan en verde.
 👀 **El usuario ve:** una página en blanco con la tipografía y colores del sistema de diseño. Poco, pero es el piso de todo.

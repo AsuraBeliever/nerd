@@ -10,7 +10,7 @@ Formato: contexto → decisión → alternativas → consecuencias.
 **5 ago 2026 · Aceptada**
 
 **Contexto.** Un desarrollador, proyecto personal de largo plazo, hosting gratuito.
-**Decisión.** Next.js 15 con App Router: Server Components para lecturas y Server Actions para escrituras.
+**Decisión.** Next.js 16 con App Router: Server Components para lecturas y Server Actions para escrituras.
 **Alternativas.** SPA + API REST/tRPC separada; Remix; SvelteKit.
 **Consecuencias.** ➕ Un solo despliegue, un solo repo, tipos compartidos de extremo a extremo, sin capa de API que mantener. ➖ Acoplamiento a Next.js; migrar después implicaría reescribir la capa de datos (riesgo aceptado: es una app personal, no un producto multiplataforma).
 
