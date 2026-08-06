@@ -1,6 +1,6 @@
 # `nerd` — Documentación del proyecto
 
-Aplicación web personal para organizar la vida universitaria y el entrenamiento físico: horario escolar, tareas y exámenes por materia, pendientes generales, y registro de rutinas de ejercicio con seguimiento de progreso.
+Aplicación web para organizar la vida universitaria y el entrenamiento físico: horario escolar, asistencia y faltas, tareas y exámenes por materia, pendientes generales, y registro de rutinas de ejercicio con seguimiento de progreso.
 
 **Cliente:** AsuraBeliever · **Developer:** Claude · **Inicio:** 5 de agosto de 2026
 
@@ -24,6 +24,7 @@ Si estás retomando el proyecto, lee en este orden:
 - [`02-stack.md`](./02-stack.md) — Cada tecnología elegida y por qué esa y no otra.
 - [`03-arquitectura.md`](./03-arquitectura.md) — Estructura de carpetas, capas y flujo de datos.
 - [`04-modelo-de-datos.md`](./04-modelo-de-datos.md) — Todas las tablas, relaciones y reglas de integridad.
+- [`08-seguridad.md`](./08-seguridad.md) — Repo público: qué nunca se commitea, privacidad y aislamiento entre usuarios.
 - [`09-decisiones.md`](./09-decisiones.md) — Registro de decisiones técnicas (ADR).
 
 ### Diseño
@@ -35,9 +36,10 @@ Si estás retomando el proyecto, lee en este orden:
 
 ### Fichas de funcionalidad
 - [`features/horario.md`](./features/horario.md) — Horario escolar.
+- [`features/asistencia.md`](./features/asistencia.md) — Faltas, porcentaje mínimo y faltas restantes.
 - [`features/academico.md`](./features/academico.md) — Tareas, exámenes y proyectos por materia.
 - [`features/pendientes.md`](./features/pendientes.md) — To-do list general.
-- [`features/gimnasio.md`](./features/gimnasio.md) — Rutinas, registro de entrenamiento y progreso.
+- [`features/entrenamiento.md`](./features/entrenamiento.md) — Rutinas en casa o gimnasio, registro y progreso.
 - [`features/dashboard.md`](./features/dashboard.md) — Pantalla de inicio, "hoy" y resumen.
 
 ---
@@ -51,4 +53,5 @@ Si estás retomando el proyecto, lee en este orden:
 | **Usuarios** | Multiusuario, login con Google |
 | **Dispositivos** | Responsive completo (móvil + escritorio) + PWA instalable |
 | **Diseño** | Minimalista |
-| **Módulos v1** | Horario · Académico · Pendientes · Gimnasio · Dashboard |
+| **Módulos v1** | Horario · Asistencia · Académico · Pendientes · Entrenamiento · Dashboard |
+| **Repositorio** | Público — ver [`08-seguridad.md`](./08-seguridad.md) |

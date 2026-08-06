@@ -1,12 +1,12 @@
 # Funcionalidad · Dashboard "Hoy"
 
-**Fase 5 · Rama `feat/dashboard` · Estado: planeado**
+**Fase 6 · Rama `feat/dashboard` · Estado: planeado**
 
 > "Esta app en sí es una forma de organizar mis ideas, y mi vida en sí."
 
 Es la pantalla que se abre al entrar. Su único trabajo: que el usuario sepa **qué hacer ahora** sin tocar nada. Todo lo que no ayude a eso, no va aquí.
 
-Va en la Fase 5 —después de horario, tareas y pendientes— porque un resumen solo se puede diseñar bien cuando ya existe lo que resume.
+Va en la Fase 6 —después de horario, asistencia, tareas y pendientes— porque un resumen solo se puede diseñar bien cuando ya existe lo que resume.
 
 ---
 
@@ -19,8 +19,10 @@ Saludo breve y la fecha. "Miércoles 5 de agosto".
 El widget del módulo de horario. Lo más urgente en la vida de un estudiante a media semana.
 > **En clase ahora** · Cálculo Diferencial · Salón 204 · termina en 35 min
 
-### 3. Clases de hoy
-Lista compacta de los bloques del día, con las ya pasadas atenuadas y la actual resaltada.
+### 3. Clases de hoy, con registro de asistencia
+Lista compacta de los bloques del día, con la actual resaltada. **Las clases que ya terminaron y no tienen registro muestran los tres botones de asistencia** (asistí / falté / tarde) ahí mismo. Es el mejor momento para capturarlo: el usuario ya está viendo su día.
+
+Si alguna materia está en ámbar o rojo por faltas, aparece un aviso de una línea: *"Cálculo: te queda 1 falta"*. Solo cuando hay riesgo real; si va holgado, no se dice nada.
 
 ### 4. Vence pronto
 Tareas y exámenes de los próximos 7 días, máximo 5, con las vencidas siempre primero. Completables desde aquí sin salir de la pantalla.
@@ -28,7 +30,7 @@ Tareas y exámenes de los próximos 7 días, máximo 5, con las vencidas siempre
 ### 5. Pendientes de hoy
 Pendientes personales con fecha de hoy o vencidos. Aquí es donde lo escolar y lo personal por fin se juntan — separados en su sección, unidos en el día.
 
-### 6. Gimnasio
+### 6. Entrenamiento
 Un renglón según el caso:
 - Sesión en curso → botón para continuar
 - Entrenó hoy → resumen breve
@@ -52,9 +54,9 @@ Miniatura del horario semanal, tocable para ir al horario completo. Solo en escr
 | Caso | Comportamiento |
 |---|---|
 | Usuario nuevo sin nada | Guía de tres pasos: crear semestre → agregar materias → agregar horario |
-| Fin de semana | Se omiten las clases; se muestran tareas, pendientes y gimnasio |
+| Fin de semana | Se omiten las clases; se muestran tareas, pendientes y entrenamiento |
 | Todo al día | Estado positivo, sin secciones vacías |
-| Vacaciones (fuera del semestre) | Se ocultan clases; se conservan pendientes y gimnasio |
+| Vacaciones (fuera del semestre) | Se ocultan clases; se conservan pendientes y entrenamiento |
 
 ## Rendimiento
 

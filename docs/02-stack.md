@@ -46,7 +46,7 @@ El usuario pidió minimalismo. Tailwind da control total sin escribir CSS suelto
 *Alternativas descartadas:* Material UI (opinionado y pesado, imposible de hacer minimalista); Chakra (runtime CSS-in-JS, más lento); CSS puro (no escala).
 
 ### PostgreSQL en Neon
-Nuestros datos son profundamente relacionales. Postgres además nos da tipos que importan aquí: `time` para bloques de horario, `timestamptz` para fechas correctas entre zonas horarias, `numeric` exacto para pesos del gimnasio (nada de errores de punto flotante en un PR). Neon ofrece Postgres serverless con plan gratuito real, escala a cero cuando no se usa, y da **ramas de base de datos** — una copia instantánea de los datos por rama de git, perfecta para el flujo de trabajo que definimos.
+Nuestros datos son profundamente relacionales. Postgres además nos da tipos que importan aquí: `time` para bloques de horario, `timestamptz` para fechas correctas entre zonas horarias, `numeric` exacto para los pesos del entrenamiento (nada de errores de punto flotante en un PR). Neon ofrece Postgres serverless con plan gratuito real, escala a cero cuando no se usa, y da **ramas de base de datos** — una copia instantánea de los datos por rama de git, perfecta para el flujo de trabajo que definimos.
 
 *Alternativas descartadas:* Supabase (trae de más: auth propia, storage, realtime — no lo necesitamos y complica); SQLite/Turso (bueno, pero Postgres es el destino natural); MongoDB (mal ajuste para datos relacionales).
 
@@ -59,10 +59,10 @@ El esquema se define en TypeScript y de ahí salen tanto los tipos como las migr
 El usuario pidió login con Google. Auth.js es el estándar del ecosistema Next.js, tiene adaptador oficial de Drizzle (las tablas de sesión se crean solas) y deja la puerta abierta a agregar GitHub o correo después sin rehacer nada. Sesiones en base de datos, no solo JWT, para poder cerrar sesión de verdad.
 
 ### Zod + React Hook Form
-Un solo esquema de validación que se usa en el formulario del navegador **y** en el servidor. Imposible que se desincronicen. React Hook Form mantiene los formularios rápidos (sin re-render en cada tecla), que importa en el registro de series del gimnasio, donde se escribe mucho y rápido.
+Un solo esquema de validación que se usa en el formulario del navegador **y** en el servidor. Imposible que se desincronicen. React Hook Form mantiene los formularios rápidos (sin re-render en cada tecla), que importa en el registro de series del entrenamiento, donde se escribe mucho y rápido.
 
 ### TanStack Query (uso acotado)
-La mayoría de la app usa Server Components y no necesita estado de cliente. Pero dos pantallas sí: **marcar tareas como hechas** y **registrar series en el gimnasio** — ahí queremos que la interfaz responda al instante (actualización optimista) aunque la red esté lenta. TanStack Query resuelve exactamente eso. No se usa en ningún otro lado.
+La mayoría de la app usa Server Components y no necesita estado de cliente. Pero dos pantallas sí: **marcar tareas como hechas** y **registrar series del entrenamiento** — ahí queremos que la interfaz responda al instante (actualización optimista) aunque la red esté lenta. TanStack Query resuelve exactamente eso. No se usa en ningún otro lado.
 
 ### Recharts
 Gráficas declarativas en React, responsivas, y estilizables hasta quedar minimalistas (sin cuadrículas, sin bordes, solo la línea y los ejes). Suficiente para líneas de progreso, barras de volumen semanal y mapas de calor de asistencia.
@@ -79,7 +79,7 @@ Reemplaza ESLint + Prettier con una sola herramienta escrita en Rust: una config
 Vitest para la lógica que puede romperse en silencio: detección de traslapes de horario, cálculo de 1RM estimado, agregación de volumen semanal, cálculo de rachas. Playwright para los caminos críticos completos: iniciar sesión, crear materia, marcar tarea, registrar entrenamiento.
 
 ### Serwist (PWA)
-El usuario está en el celular, en la escuela y en el gimnasio — donde el WiFi es malo. Serwist es el sucesor mantenido de Workbox para Next.js: instalable en la pantalla de inicio y con caché offline de lo ya visto. La escritura offline con sincronización posterior queda para una fase posterior, documentada como tal.
+El usuario está en el celular, en la escuela y entrenando — donde el WiFi es malo. Serwist es el sucesor mantenido de Workbox para Next.js: instalable en la pantalla de inicio y con caché offline de lo ya visto. La escritura offline con sincronización posterior queda para una fase posterior, documentada como tal.
 
 ### Vercel + GitHub Actions
 Vercel: deploy automático desde `main`, HTTPS y dominio incluidos, plan gratuito suficiente. GitHub Actions corre typecheck, lint y tests en cada rama — si algo está roto, se sabe antes de que el usuario lo vea.

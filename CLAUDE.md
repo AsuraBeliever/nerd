@@ -4,6 +4,22 @@
 
 ---
 
+## 0. Regla permanente: configurable, nunca a la medida del cliente
+
+> *"Déjalo libre para que cada quien lo pueda configurar a su manera, **siempre mantén en mente esa regla**."* — el cliente, sesión 3.
+
+Cada vez que el cliente me dice cómo funciona **su** escuela, **su** semana o **su** entrenamiento, eso es un **valor por defecto**, jamás una constante en el código. La pregunta que me hago antes de escribir cualquier condicional:
+
+> ¿Otra persona podría querer esto distinto? Si la respuesta es sí, es una preferencia.
+
+Ejemplos ya decididos: las justificadas cuentan como asistencia (default `true`), no se registran retardos (default `false`), mínimo de asistencia 80%, entrenamiento con puro peso corporal, semana de lunes a viernes. **Todos configurables.** Ninguno escrito en el código.
+
+Regla técnica que lo sostiene: toda función que dependa de una preferencia **la recibe como parámetro**; nunca la lee de una constante ni de un valor global. Detalle en ADR-012.
+
+Corolario de interfaz: cuando el usuario apaga algo, la interfaz **se encoge**. Si desactiva los retardos, el botón "Tarde" desaparece — no se queda gris ni estorbando.
+
+---
+
 ## 1. Roles (no negociable)
 
 | | Quién | Responsabilidad |
@@ -124,7 +140,7 @@ El usuario pidió que **todo quede documentado**. No es opcional ni "si da tiemp
 - **ORM:** Drizzle ORM + Drizzle Kit para migraciones
 - **Auth:** Auth.js v5 con Google OAuth (multiusuario desde el día uno)
 - **Validación:** Zod, compartido entre formulario y servidor
-- **Gráficas:** Recharts (progreso del gimnasio)
+- **Gráficas:** Recharts (progreso del entrenamiento)
 - **Calidad:** Biome (lint + formato), Vitest (unitarias), Playwright (end-to-end)
 - **PWA:** Serwist (instalable + offline)
 - **Hosting:** Vercel, deploy automático desde `main`
@@ -154,9 +170,11 @@ npm run db:seed      # datos de ejemplo para desarrollo
 - TypeScript `strict`. **Prohibido `any`** — si no hay tipo, se modela con `unknown` + validación Zod.
 - Server Components por defecto; `"use client"` solo cuando hay interactividad real.
 - Mutaciones vía **Server Actions**, siempre con: validación Zod → verificación de sesión → verificación de propiedad del dato.
-- **Aislamiento multiusuario:** toda consulta filtra por `userId`. Ninguna query sin ese filtro, sin excepciones. Es el bug de seguridad más fácil de cometer y el más grave.
-- Nada de secretos en el repo. Variables de entorno documentadas en `.env.example` con valores falsos.
-- Fechas: guardar en UTC (`timestamptz`), mostrar en la zona horaria del usuario (`America/Mexico_City` por defecto, configurable).
+- **Aislamiento multiusuario:** toda consulta filtra por `userId`. Ninguna query sin ese filtro, sin excepciones. Es el bug de seguridad más fácil de cometer y el más grave. Recurso ajeno → responder 404, nunca 403.
+- **El repositorio es PÚBLICO.** Nada de secretos, ni datos personales reales, ni en el código ni en la documentación. Reglas completas en `docs/08-seguridad.md`. Antes de cada push: leer el diff y preguntarse *"¿hay algo aquí que no querría ver en un buscador?"*.
+- **Configurable, no codificado a mi cliente** (ADR-012). Si el usuario puede tener una opinión sobre un comportamiento, es una preferencia, no una constante. Los 7 días de la semana valen igual, el umbral de asistencia lo pone él, la unidad de peso la elige él. Toda función que dependa de una preferencia la recibe como parámetro.
+- Fechas: guardar en UTC (`timestamptz`), mostrar en la zona horaria del usuario (detectada del navegador, editable).
+- Masas siempre en kilogramos en la base de datos; la unidad del usuario es solo visualización (ADR-011).
 - Archivos pequeños y con un solo propósito. Si un archivo pasa de ~250 líneas, se parte.
 - Accesibilidad: navegable con teclado, contraste AA, etiquetas en todos los campos.
 
@@ -164,11 +182,14 @@ npm run db:seed      # datos de ejemplo para desarrollo
 
 ## 11. Contexto del cliente
 
-- Estudiante universitario. La app es para organizar su vida: escuela + gimnasio.
+- Estudiante universitario. La app es para organizar su vida: escuela + entrenamiento.
 - Usa la app **tanto en celular como en escritorio** — responsive completo, sin excusas.
 - Prefiere **diseño minimalista**. Poco ruido visual, mucho espacio en blanco, jerarquía clara. Nada de adornos.
-- La app se llama `nerd`.
-- Zona horaria por defecto: `America/Mexico_City` (confirmar si cambia).
+- **Entrena en casa con puro peso corporal**, ejercicios básicos. El módulo se diseña primero para eso — pero soporta mancuernas, bandas y gimnasio igual de bien, a un toque en Ajustes.
+- Le importa **registrar faltas** y saber cuántas le quedan antes de rebasar el mínimo de asistencia. En su escuela: mínimo 80%, las justificadas cuentan, los retardos no existen. **Todo eso son defaults, no reglas** (ver sección 0).
+- **No** quiere calificaciones por ahora, pero pidió dejarlo abierto: las columnas existen dormidas (ADR-013). No activarlas hasta que él lo pida.
+- Piensa en la app como producto, no solo como herramienta personal: pidió explícitamente que todo sea configurable para cualquier usuario, no a su medida de hoy.
+- La app se llama `nerd`. Repositorio público: `github.com/AsuraBeliever/nerd`.
 
 ---
 
@@ -184,6 +205,7 @@ npm run db:seed      # datos de ejemplo para desarrollo
 | `docs/05-diseno-ui.md` | Sistema de diseño minimalista |
 | `docs/06-roadmap.md` | Fases, ramas y orden de construcción |
 | `docs/07-git-workflow.md` | Flujo de git y versionado en detalle |
+| `docs/08-seguridad.md` | **Repo público:** qué nunca se commitea, privacidad, aislamiento |
 | `docs/09-decisiones.md` | Registro de decisiones técnicas (ADR) |
 | `docs/features/*.md` | Ficha detallada de cada módulo |
 | `docs/BITACORA.md` | **Diario de sesiones — se actualiza siempre** |

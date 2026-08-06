@@ -1,6 +1,6 @@
 # Funcionalidad · Tareas, exámenes y proyectos
 
-**Fase 3 · Rama `feat/academic-tasks` · Estado: planeado**
+**Fase 4 · Rama `feat/academic-tasks` · Estado: planeado**
 
 > "Poder poner en cada materia mis tareas / exámenes / pendientes."
 
@@ -49,7 +49,7 @@ Botón flotante en móvil, `Ctrl/Cmd + K` en escritorio. Un solo campo de texto:
 
 ## Reglas de negocio
 
-- La materia es opcional en el modelo (`course_id NULL` = pendiente personal, Fase 4), pero en esta pantalla siempre se pide.
+- La materia es opcional en el modelo (`course_id NULL` = pendiente personal, Fase 5), pero en esta pantalla siempre se pide.
 - Sin hora (`has_time = false`) se muestra solo la fecha; con hora se muestra "vie 21 · 7:00 pm".
 - Al completar: se guarda `completed_at`, la tarea se desvanece de la lista y aparece un aviso con **Deshacer** durante 5 segundos.
 - Una tarea vencida no se oculta ni se archiva sola: sigue arriba hasta que el usuario la resuelva.
@@ -85,12 +85,19 @@ Es el único uso de color semántico en las listas. Sostiene el objetivo #2 del 
 - Orden dentro de cada grupo (prioridad, luego hora, luego creación).
 - Cálculo de progreso de subtareas.
 
+## Calificaciones: presentes pero dormidas
+
+El cliente fue claro: *"No me interesa registrar calificaciones, pero déjalo abierto en caso de que alguien quiera o yo mismo cambie de opinión."*
+
+La forma correcta de dejar algo abierto no es escribir una nota y olvidarla — es que la base de datos ya lo soporte. Desde la **primera migración** existen `tasks.grade`, `tasks.grade_weight_pct`, `courses.passing_grade` y `courses.grade_scale`, **sin ninguna interfaz**. Se activan con el interruptor `track_grades` en Ajustes (Fase 7), que viene apagado.
+
+Resultado: hoy no hay ni un campo de más en pantalla, y el día que se quiera activar solo hay que escribir las pantallas — nada de migrar datos reales de producción. Registrado en ADR-013.
+
 ## Fuera de alcance en esta fase
 
-Tareas recurrentes · adjuntar archivos · recordatorios push · calificaciones y promedio · estimación de tiempo. Al backlog.
+Tareas recurrentes · adjuntar archivos · recordatorios push · interfaz de calificaciones y promedio · estimación de tiempo. Al backlog.
 
 ## Preguntas abiertas para el cliente
 
 - ¿Te sirve un tipo "lectura", o con tarea/examen/proyecto basta?
 - Al completar una tarea, ¿prefieres que desaparezca o que se quede tachada un rato?
-- ¿Quieres registrar la calificación obtenida en cada tarea/examen? (definiría si adelantamos el módulo de calificaciones)

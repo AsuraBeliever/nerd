@@ -1,6 +1,6 @@
 # Funcionalidad · Pendientes generales (to-do list)
 
-**Fase 4 · Rama `feat/personal-todos` · Estado: planeado**
+**Fase 5 · Rama `feat/personal-todos` · Estado: planeado**
 
 > "Poder poner aparte los pendientes que tengo, tipo una to-do list."
 
@@ -12,7 +12,7 @@ La palabra clave es **aparte**: lo personal no debe ahogarse entre lo escolar. P
 
 Por debajo son la misma tabla `tasks`, con `course_id = NULL` (ver ADR-004). La separación ocurre en la interfaz: sección propia, navegación propia, y las tareas escolares nunca aparecen aquí ni viceversa. El usuario percibe dos listas independientes; el código mantiene una sola.
 
-Gracias a eso, esta fase es corta: reutiliza el formulario, la lógica de fechas, las subtareas y el completar con deshacer de la Fase 3.
+Gracias a eso, esta fase es corta: reutiliza el formulario, la lógica de fechas, las subtareas y el completar con deshacer de la Fase 4.
 
 ---
 

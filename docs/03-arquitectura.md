@@ -37,11 +37,13 @@ nerd/
     │   │   ├── page.tsx         # dashboard / "hoy"
     │   │   ├── horario/
     │   │   ├── materias/[courseId]/
+    │   │   ├── asistencia/
     │   │   ├── tareas/
     │   │   ├── pendientes/
-    │   │   ├── gym/
+    │   │   ├── entrenamiento/
     │   │   │   ├── rutinas/
     │   │   │   ├── entrenar/
+    │   │   │   ├── historial/
     │   │   │   └── progreso/
     │   │   └── ajustes/
     │   ├── api/auth/[...nextauth]/
@@ -61,8 +63,10 @@ nerd/
     │   │   ├── schemas.ts       # Zod
     │   │   └── lib.ts           # lógica pura (traslapes, orden por día)
     │   ├── courses/
+    │   ├── attendance/          # incluye el cálculo de faltas restantes
     │   ├── tasks/               # cubre tareas académicas Y pendientes generales
-    │   ├── workouts/
+    │   ├── training/            # incluye units.ts (kg ↔ lb)
+    │   ├── settings/            # preferencias del usuario
     │   └── dashboard/
     │
     ├── db/
@@ -70,8 +74,9 @@ nerd/
     │   ├── schema/              # un archivo por dominio
     │   │   ├── auth.ts
     │   │   ├── academic.ts
+    │   │   ├── attendance.ts
     │   │   ├── tasks.ts
-    │   │   ├── gym.ts
+    │   │   ├── training.ts
     │   │   └── index.ts
     │   └── seed.ts
     │
@@ -121,7 +126,7 @@ Los pasos 1–3 son **obligatorios en toda Server Action**. Sin excepción.
 
 ### Escrituras optimistas (solo dos casos)
 
-Marcar una tarea como hecha y registrar una serie en el gimnasio usan `useOptimistic` / TanStack Query: la interfaz cambia al instante y, si el servidor falla, se revierte con un aviso. Son las dos acciones que se repiten decenas de veces al día — la espera ahí se siente.
+Marcar una tarea como hecha y registrar una serie de entrenamiento usan `useOptimistic` / TanStack Query: la interfaz cambia al instante y, si el servidor falla, se revierte con un aviso. Son las dos acciones que se repiten decenas de veces al día — la espera ahí se siente.
 
 ---
 
@@ -143,7 +148,7 @@ Además, las claves foráneas usan `ON DELETE CASCADE` desde `users`: borrar la 
 - Índices en todas las columnas que se filtran (`user_id`, `due_at`, `term_id`, `workout_id`) — ver `04-modelo-de-datos.md`.
 - `next/font` para tipografía sin parpadeo ni petición externa.
 - Objetivo: **Lighthouse ≥ 95** en móvil, interacción visible en menos de 100 ms.
-- Los cálculos de progreso del gimnasio se agregan **en SQL**, no trayendo miles de series al navegador.
+- Los cálculos de progreso del entrenamiento se agregan **en SQL**, no trayendo miles de series al navegador.
 
 ## Manejo de errores
 
